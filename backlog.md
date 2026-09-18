@@ -12,7 +12,7 @@
 
 **Given:** Que el usuario ingresa a `/api/v1/auth/register`.
 
-**When:** Envía un JSON con nombre, `ubicacion_valle` y cedula válida.
+**When:** Envía un JSON con nombre, `ubicacion_valle` y documento_válido.
 
 **Then:** El sistema responde con un **Status 201 Created** y el registro persiste en la base de datos PostgreSQL.
 
@@ -192,7 +192,7 @@
 
 **Given:** Que el usuario ingresa a `/api/v1/auth/register`.
 
-**When:** Envía un JSON con nombre, `ubicacion_valle` y cedula válida.
+**When:** Envía un JSON con nombre, `ubicacion_valle` y cedula_válido.
 
 **Then:** El sistema responde con un **Status 201 Created** y el registro persiste en la base de datos PostgreSQL.
 
