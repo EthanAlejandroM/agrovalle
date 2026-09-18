@@ -67,5 +67,3 @@ Ethan Alejandro Mezu Quizaboni [✓]
 Nicolle Mera Gomez [✓]
 Julián David Peña Chocue [✓] 
 Bairon Palacios Urrutia [✓] 
-
-**Fecha de aprobación:**15/Sep/2026
