@@ -10,30 +10,29 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
-@Entity 
+@Entity
 @Table(name = "usuario")
-
 public class Usuario {
 
-    @Id 
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    @NotBlank 
-    private String nombre;
+  @NotBlank
+  private String nombre;
 
-    @NotBlank 
-    private String ubicacion_valle;
+  @NotBlank
+  private String ubicacionValle;
 
-    @NotBlank 
-    private String documento;
+  @NotBlank
+  private String documento;
 
-    @NotBlank 
-    @Enumerated (EnumType.STRING)
-    private TipoUsuario rol;
+  @NotNull
+  @Enumerated(EnumType.STRING)
+  private TipoUsuario rol;
 
-    @NotBlank 
-    private LocalDate fecha_registro;
-
+  @NotNull
+  private LocalDate fechaRegistro;
 }
