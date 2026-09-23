@@ -1,4 +1,4 @@
-CREATE TABLE public.usuario
+CREATE TABLE  IF NOT EXISTS public.usuario
 (
     id serial NOT NULL,
     nombre character varying NOT NULL,
