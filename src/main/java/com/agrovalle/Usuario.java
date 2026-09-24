@@ -26,6 +26,10 @@ public class Usuario {
   @NotBlank
   private String ubicacionValle;
 
+  @NotBlank 
+  @Enumerated(EnumType.STRING)
+  private TipoDocumento tipoDocumento;
+
   @NotBlank
   private String documento;
 
