@@ -18,7 +18,7 @@ Aplicación web empresarial (desarrollada en Java 17 / Spring Boot) que busca tr
 
 ## Estrategia de Ramificación (Git Flow)
 
-Git Flow es una estrategia muy sencilla, clara y ordenada para equipos que especialmente se encuentran en etapa de aprendizaje. Además, trabajar con el flujo de control de versiones estructurado facilita la gestión de funcionalidades nuevas, correcciones y versiones que se encuentren en producción. También ayuda a mantener una comunicación constante con el equipo sobre cada cambio que se vaya realizando, reduciendo así la probabilidad de errores en la rama `main`. 
+Git Flow es una estrategia muy sencilla, clara y ordenada para equipos que especialmente se encuentran en etapa de aprendizaje. Además, trabajar con el flujo de control de versiones estructurado facilita la gestión de funcionalidades nuevas, correcciones y versiones que se encuentren en producción. También ayuda a mantener una comunicación constante con el equipo sobre cada cambio que se vaya realizando, reduciendo así la probabilidad de errores en la rama `main`.
 
 **Guía rápida de ramas:**
 
@@ -28,7 +28,7 @@ Git Flow es una estrategia muy sencilla, clara y ordenada para equipos que espec
 - `hotfix/*` / `bugfix/*`: Ramas dedicadas a la corrección rápida de errores en producción o en etapas de integración.
 
 >[!IMPORTANT]
-> - No trabajaremos directamente sobre `main` ni `develop`.  
+> - No trabajaremos directamente sobre `main` ni `develop`.
 > - Para cada tarea o Historia de Usuario creamos una rama `feature/*`. Evitar crear ramas demasiado generales.
 > - Los mensajes de commit se escribirán en inglés siguiendo Conventional Commits.
 > - Los nombres de las ramas pueden utilizar español e inglés, siempre que sean descriptivos y consistentes.
@@ -38,8 +38,8 @@ Git Flow es una estrategia muy sencilla, clara y ordenada para equipos que espec
 
 ### Diagrama del Flujo de Ramas (Mermaid)
 
-```mermaid    
- 
+```mermaid
+
 gitGraph
     commit id: "Initial project"
 
@@ -89,3 +89,14 @@ gitGraph
     checkout develop
     merge hotfix/v1.0.1
 ```
+
+---
+## Configuración de la base de datos
+
+El proyecto utiliza PostgreSQL y requiere configurar las siguientes variables de entorno:
+
+```bash
+export DB_USERNAME=postgres
+export DB_PASSWORD='TU_CONTRASEÑA_DE_POSTGRES'
+```
+**Nota:** No se debe subir la contraseña real al repositorio. Cada desarrollador debe configurar sus propias variables de entorno localmente.

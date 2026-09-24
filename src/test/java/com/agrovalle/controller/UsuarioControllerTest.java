@@ -16,25 +16,25 @@ class UsuarioControllerTest {
 
   @Test
   void solicitudSinDatosDebeRetornar400() throws Exception {
-    mockMvc.perform(post("/usuarios"))
+    mockMvc.perform(post("/api/v1/auth/register"))
         .andExpect(status().isBadRequest());
   }
 
   @Test
-    void documentoInvalidoDebeRetornar400() throws Exception {
+   void documentoInvalidoDebeRetornar400() throws Exception {
     String solicitud = """
-        {
-            "nombre": "Nicolle",
-            "ubicacionValle": "Cali",
-            "tipoDocumento": "CC",
-            "documento": "123-456",
-            "rol": "COMPRADOR"
-        }
-        """;
+    {
+        "nombre": "Nicolle",
+        "ubicacionValle": "Cali",
+        "tipoDocumento": "CC",
+        "documento": "123-456",
+        "rol": "COMPRADOR"
+    }
+    """;
 
-    mockMvc.perform(post("/usuarios")
-            .contentType("application/json")
-            .content(solicitud))
-        .andExpect(status().isBadRequest());
+    mockMvc.perform(post("/api/v1/auth/register")
+        .contentType("application/json")
+        .content(solicitud))
+    .andExpect(status().isBadRequest());
     }
 }
