@@ -1,25 +1,28 @@
 package com.agrovalle;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 
 public class RegistroUsuarioSolicitud {
 
-  @NotBlank
+  @NotBlank(message = "El nombre es obligatorio.")
   private String nombre;
 
-  @NotBlank
+  @JsonAlias("ubicacion_valle")
+  @NotBlank(message = "La ubicación en el Valle es obligatoria.")
   private String ubicacionValle;
 
-  @NotNull
+  @NotNull(message = "El tipo de documento es obligatorio (CC, CE o PASAPORTE).")
   private TipoDocumento tipoDocumento;
 
-  @NotBlank
-  @Pattern(regexp = "^[A-Za-z0-9]+$")
+  @NotBlank(message = "El documento es obligatorio.")
+  @Pattern(regexp = "^[A-Za-z0-9]+$",
+      message = "El documento solo puede contener letras y números, sin espacios ni guiones.")
   private String documento;
 
-  @NotNull
+  @NotNull(message = "El rol es obligatorio (AGRICULTOR o COMPRADOR).")
   private TipoUsuario rol;
 
   public String getNombre() {
@@ -61,6 +64,4 @@ public class RegistroUsuarioSolicitud {
   public void setRol(TipoUsuario rol) {
     this.rol = rol;
   }
-
-  
 }
