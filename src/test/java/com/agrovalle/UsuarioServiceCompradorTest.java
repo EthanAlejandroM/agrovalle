@@ -1,15 +1,7 @@
 package com.agrovalle;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 import com.agrovalle.exception.DocumentoDuplicadoException;
 import com.agrovalle.service.UsuarioService;
-import java.time.LocalDate;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,9 +10,16 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDate;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+
 @ExtendWith(MockitoExtension.class)
-@DisplayName("UsuarioService - registro de agricultores (HU-01)")
-class UsuarioServiceTest {
+@DisplayName("UsuarioService - registro de compradores (HU-11)")
+class UsuarioServiceCompradorTest {
 
   @Mock
   private UsuarioRepository usuarioRepository;
@@ -28,34 +27,34 @@ class UsuarioServiceTest {
   @InjectMocks
   private UsuarioService usuarioService;
 
-  private RegistroUsuarioSolicitud solicitudAgricultor() {
+  private RegistroUsuarioSolicitud solicitudComprador() {
     RegistroUsuarioSolicitud solicitud = new RegistroUsuarioSolicitud();
-    solicitud.setNombre("Ethan");
-    solicitud.setUbicacionValle("Dagua");
+    solicitud.setNombre("Restaurante El Trapiche");
+    solicitud.setUbicacionValle("Cali");
     solicitud.setTipoDocumento(TipoDocumento.CC);
-    solicitud.setDocumento("1234567890");
-    solicitud.setRol(TipoUsuario.AGRICULTOR);
+    solicitud.setDocumento("5550001112");
+    solicitud.setRol(TipoUsuario.COMPRADOR);
     return solicitud;
   }
 
   @Test
-  @DisplayName("Documento nuevo: guarda el usuario con rol AGRICULTOR y fecha de hoy")
-  void documentoNuevoDebeGuardarAgricultor() {
-    when(usuarioRepository.existsByDocumento("1234567890")).thenReturn(false);
+  @DisplayName("Documento nuevo: guarda el usuario con rol COMPRADOR y fecha de hoy")
+  void documentoNuevoDebeGuardarComprador() {
+    when(usuarioRepository.existsByDocumento("5550001112")).thenReturn(false);
     when(usuarioRepository.save(any(Usuario.class)))
         .thenAnswer(invocacion -> invocacion.getArgument(0));
 
-    Usuario resultado = usuarioService.registrar(solicitudAgricultor());
+    Usuario resultado = usuarioService.registrar(solicitudComprador());
 
     ArgumentCaptor<Usuario> captor = ArgumentCaptor.forClass(Usuario.class);
     verify(usuarioRepository).save(captor.capture());
     Usuario guardado = captor.getValue();
 
-    assertEquals("Ethan", guardado.getNombre());
-    assertEquals("Dagua", guardado.getUbicacionValle());
+    assertEquals("Restaurante El Trapiche", guardado.getNombre());
+    assertEquals("Cali", guardado.getUbicacionValle());
     assertEquals(TipoDocumento.CC, guardado.getTipoDocumento());
-    assertEquals("1234567890", guardado.getDocumento());
-    assertEquals(TipoUsuario.AGRICULTOR, guardado.getRol());
+    assertEquals("5550001112", guardado.getDocumento());
+    assertEquals(TipoUsuario.COMPRADOR, guardado.getRol());
     assertEquals(LocalDate.now(), guardado.getFechaRegistro());
     assertEquals(guardado, resultado);
   }
@@ -63,10 +62,10 @@ class UsuarioServiceTest {
   @Test
   @DisplayName("Documento repetido: lanza DocumentoDuplicadoException y no guarda nada")
   void documentoDuplicadoDebeLanzarExcepcionYNoGuardar() {
-    when(usuarioRepository.existsByDocumento("1234567890")).thenReturn(true);
+    when(usuarioRepository.existsByDocumento("5550001112")).thenReturn(true);
 
     assertThrows(DocumentoDuplicadoException.class,
-        () -> usuarioService.registrar(solicitudAgricultor()));
+        () -> usuarioService.registrar(solicitudComprador()));
 
     verify(usuarioRepository, never()).save(any(Usuario.class));
   }

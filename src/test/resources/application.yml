@@ -2,8 +2,8 @@ spring:
   datasource:
     url: jdbc:h2:mem:agrovalle_test;MODE=PostgreSQL
     driver-class-name: org.h2.Driver
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
+    username:
+    password:
   jpa:
     hibernate:
       ddl-auto: create-drop
