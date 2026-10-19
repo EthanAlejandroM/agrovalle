@@ -1,4 +1,4 @@
-# KB-01: Políticas Explícitas del Flujo Kanban
+# Políticas Explícitas del Flujo Kanban
 
 ## Descripción
 
