@@ -106,6 +106,7 @@ class RegistroAgricultorBddTest {
     mockMvc.perform(post(URL)
             .contentType(MediaType.APPLICATION_JSON)
             .content(solicitud("Nicolle", "123-456")))
+            
         // Then: el sistema responde 400 Bad Request indicando el campo documento
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.codigo").value("VALIDACION_FALLIDA"))
