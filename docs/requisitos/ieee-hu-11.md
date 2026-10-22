@@ -1,7 +1,6 @@
 # Especificación de requisitos (ISO/IEC/IEEE 29148): HU-11
 
 **Proyecto:** AgroValle Connect
-**Ubicación sugerida:** `docs/requisitos/ieee-hu-11.md`
 **Documento general:** [especificacion-requisitos-ieee-29148.md](./especificacion-requisitos-ieee-29148.md)
 **Historia en el tablero:** [Ver tarjeta de HU-11 en GitHub Projects](https://github.com/users/EthanAlejandroM/projects/1)
 ## 1. Introducción

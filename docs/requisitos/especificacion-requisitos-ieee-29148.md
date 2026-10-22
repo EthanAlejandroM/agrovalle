@@ -1,7 +1,7 @@
 # Especificación de requisitos: formato ISO/IEC/IEEE 29148
 
 **Proyecto:** AgroValle Connect  
-**Ubicación sugerida:** `docs/requisitos/especificacion-requisitos-ieee-29148.md`
+
 
 ## 1. Propósito
 

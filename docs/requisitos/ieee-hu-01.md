@@ -1,7 +1,6 @@
 # Especificación de requisitos (ISO/IEC/IEEE 29148): HU-01
 
-**Proyecto:** AgroValle Connect  
-**Ubicación sugerida:** `docs/requisitos/ieee-hu-01.md`  
+**Proyecto:** AgroValle Connect   
 **Documento general:** [especificacion-requisitos-ieee-29148.md](./especificacion-requisitos-ieee-29148.md)  
 **Historia en el tablero:** [Ver HU-01 en el tablero del Sprint 1](https://github.com/users/EthanAlejandroM/projects/1)
 
