@@ -27,7 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 @AutoConfigureMockMvc
 @Transactional
 @DisplayName("HU-01: Registro de Agricultores (BDD de integración)")
-class RegistroAgricultorBddTest {
+class RegistroAgricultorTDDTest {
 
   private static final String URL = "/api/v1/auth/register";
 
