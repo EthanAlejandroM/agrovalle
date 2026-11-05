@@ -23,7 +23,7 @@
     <properties>
         <java.version>17</java.version>
         <cucumber.version>7.20.1</cucumber.version>
-        <jacoco.minimum.coverage>0.60</jacoco.minimum.coverage>
+        <jacoco.minimum.coverage>0.6</jacoco.minimum.coverage>
     </properties>
 
     <dependencies>
