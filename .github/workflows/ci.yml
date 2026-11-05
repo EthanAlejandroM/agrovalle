@@ -5,6 +5,10 @@ on:
     branches:
       - develop
       - main
+      - 'feature/**'
+      - 'bugfix/**'
+      - 'hotfix/**'
+      - 'release/**'
   pull_request:
     branches:
       - develop
