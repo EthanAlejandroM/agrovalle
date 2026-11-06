@@ -30,7 +30,7 @@
 
 **Given:** Un agricultor autenticado con token JWT.
 
-**When:** Publica un producto con tipo, cantidad y `fecha_cosecha`.
+**When:** Publica un producto con tipo, cantidad y `precio`.
 
 **Then:** El sistema valida que la fecha no sea anterior a hoy y retorna un ID de producto único.
 
@@ -228,7 +228,7 @@
 
 **Given:** El agricultor tiene productos registrados y disponibles en la aplicación.
 
-**When:** El agricultor actualiza la cantidad disponible de un producto.
+**When:** El agricultor actualiza la cantidad disponible de su producto (atraves del lote).
 
 **Then:** El sistema actualiza el inventario y muestra la nueva cantidad disponible para los clientes.
 
