@@ -1,9 +1,9 @@
 # CheckList de calidad para Mockups y UX/UI
-[ ] El proceso de registro permite diferenciar de forma clara si el usuario se registra como Agricultor o como Comprador.
+[x] El proceso de registro permite diferenciar de forma clara si el usuario se registra como Agricultor o como Comprador.
 
-[ ] El registro solicita únicamente los datos esenciales para empezar evitando formularios extensos que desanimen al usuario.
+[x] El registro solicita únicamente los datos esenciales para empezar evitando formularios extensos que desanimen al usuario.
 
-[ ] El mockup del Login incluye una opción accesible y clara para la recuperación de contraseña
+[x] El mockup del Login incluye una opción accesible y clara para la recuperación de contraseña
 
 [ ] El panel permite al agricultor visualizar rápidamente sus productos publicados, el stock disponible y sus precios.
 
