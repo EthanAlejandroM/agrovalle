@@ -51,7 +51,7 @@ class UsuarioControllerCompradorTest {
 
   private Usuario compradorGuardado() {
     Usuario usuario = new Usuario();
-    usuario.setId(7L);
+    usuario.setId(7);
     usuario.setNombre("Restaurante El Trapiche");
     usuario.setUbicacionValle("Cali");
     usuario.setTipoDocumento(TipoDocumento.CC);
@@ -68,14 +68,13 @@ class UsuarioControllerCompradorTest {
         .thenReturn(compradorGuardado());
 
     mockMvc.perform(post(URL)
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(solicitud("5550001112", "\"COMPRADOR\"")))
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(solicitud("5550001112", "\"COMPRADOR\"")))
         .andExpect(status().isCreated())
         .andExpect(jsonPath("$.id").value(7))
         .andExpect(jsonPath("$.rol").value("COMPRADOR"));
 
-    ArgumentCaptor<RegistroUsuarioSolicitud> captor =
-        ArgumentCaptor.forClass(RegistroUsuarioSolicitud.class);
+    ArgumentCaptor<RegistroUsuarioSolicitud> captor = ArgumentCaptor.forClass(RegistroUsuarioSolicitud.class);
     verify(usuarioService).registrar(captor.capture());
     assertEquals(TipoUsuario.COMPRADOR, captor.getValue().getRol());
   }
@@ -88,8 +87,8 @@ class UsuarioControllerCompradorTest {
             "Ya existe un usuario registrado con ese documento."));
 
     mockMvc.perform(post(URL)
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(solicitud("5550001112", "\"COMPRADOR\"")))
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(solicitud("5550001112", "\"COMPRADOR\"")))
         .andExpect(status().isConflict())
         .andExpect(jsonPath("$.status").value(409))
         .andExpect(jsonPath("$.codigo").value("DOCUMENTO_DUPLICADO"))
@@ -101,8 +100,8 @@ class UsuarioControllerCompradorTest {
   @DisplayName("Documento con guion: responde 400 y señala el campo documento")
   void documentoInvalidoDebeRetornar400() throws Exception {
     mockMvc.perform(post(URL)
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(solicitud("555-000", "\"COMPRADOR\"")))
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(solicitud("555-000", "\"COMPRADOR\"")))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.codigo").value("VALIDACION_FALLIDA"))
         .andExpect(jsonPath("$.errores[?(@.campo == 'documento')]").isNotEmpty());
@@ -114,8 +113,8 @@ class UsuarioControllerCompradorTest {
   @DisplayName("Rol ausente (null): responde 400 y señala el campo rol")
   void rolAusenteDebeRetornar400() throws Exception {
     mockMvc.perform(post(URL)
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(solicitud("5550001112", "null")))
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(solicitud("5550001112", "null")))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.codigo").value("VALIDACION_FALLIDA"))
         .andExpect(jsonPath("$.errores[?(@.campo == 'rol')]").isNotEmpty());

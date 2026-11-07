@@ -57,8 +57,8 @@ class RegistroAgricultorTDDTest {
 
     // When: envía nombre, ubicación del Valle y un documento válido
     mockMvc.perform(post(URL)
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(solicitud("Ethan", "1234567890")))
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(solicitud("Ethan", "1234567890")))
         // Then: el sistema responde 201 Created con el id del recurso creado
         .andExpect(status().isCreated())
         .andExpect(jsonPath("$.id").isNumber());
@@ -80,14 +80,14 @@ class RegistroAgricultorTDDTest {
   void documentoDuplicadoNoDebeCrearSegundoRegistro() throws Exception {
     // Given: ya existe un agricultor registrado con ese documento
     mockMvc.perform(post(URL)
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(solicitud("Bairon", "999999999")))
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(solicitud("Bairon", "999999999")))
         .andExpect(status().isCreated());
 
     // When: otro usuario intenta registrarse con el mismo documento
     mockMvc.perform(post(URL)
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(solicitud("Otra Persona", "999999999")))
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(solicitud("Otra Persona", "999999999")))
         // Then: el sistema responde 409 Conflict con un error estructurado
         .andExpect(status().isConflict())
         .andExpect(jsonPath("$.codigo").value("DOCUMENTO_DUPLICADO"));
@@ -104,8 +104,8 @@ class RegistroAgricultorTDDTest {
     // Given: el usuario ingresa a /api/v1/auth/register
     // When: envía un documento con formato inválido (contiene guion)
     mockMvc.perform(post(URL)
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(solicitud("Nicolle", "123-456")))
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(solicitud("Nicolle", "123-456")))
             
         // Then: el sistema responde 400 Bad Request indicando el campo documento
         .andExpect(status().isBadRequest())

@@ -1,7 +1,9 @@
+
 package com.agrovalle;
 
 import java.time.LocalDate;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -18,7 +20,8 @@ public class Usuario {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+  @Column(name = "\"Id_usuario\"")
+  private Integer id;
 
   @NotBlank
   private String nombre;
@@ -26,25 +29,35 @@ public class Usuario {
   @NotBlank
   private String ubicacionValle;
 
-  @NotNull 
+  @NotNull
   @Enumerated(EnumType.STRING)
   private TipoDocumento tipoDocumento;
 
   @NotBlank
   private String documento;
 
-  @NotNull 
+  @NotNull
   @Enumerated(EnumType.STRING)
   private TipoUsuario rol;
 
   @NotNull
   private LocalDate fechaRegistro;
 
-  public Long getId() {
+  @NotBlank
+  private String telefono;
+
+  @NotBlank
+  private String correo;
+
+  @NotBlank
+  @Column(name = "\"contraseña_hash\"")
+  private String contrasenaHash;
+
+  public Integer getId() {
     return id;
   }
 
-  public void setId(Long id) {
+  public void setId(Integer id) {
     this.id = id;
   }
 
@@ -94,5 +107,29 @@ public class Usuario {
 
   public void setFechaRegistro(LocalDate fechaRegistro) {
     this.fechaRegistro = fechaRegistro;
+  }
+
+  public String getTelefono() {
+    return telefono;
+  }
+
+  public void setTelefono(String telefono) {
+    this.telefono = telefono;
+  }
+
+  public String getCorreo() {
+    return correo;
+  }
+
+  public void setCorreo(String correo) {
+    this.correo = correo;
+  }
+
+  public String getContrasenaHash() {
+    return contrasenaHash;
+  }
+
+  public void setContrasenaHash(String contrasenaHash) {
+    this.contrasenaHash = contrasenaHash;
   }
 }
