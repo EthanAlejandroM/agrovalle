@@ -14,18 +14,23 @@ import com.agrovalle.TipoDocumento;
 import com.agrovalle.TipoUsuario;
 import com.agrovalle.Usuario;
 import com.agrovalle.exception.DocumentoDuplicadoException;
+import com.agrovalle.service.AuthService;
 import com.agrovalle.service.UsuarioService;
 import java.time.LocalDate;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(UsuarioController.class)
+@ActiveProfiles("test")
+@AutoConfigureMockMvc(addFilters = false)
 @DisplayName("UsuarioController - POST /api/v1/auth/register con rol COMPRADOR (HU-11)")
 class UsuarioControllerCompradorTest {
 
@@ -37,6 +42,9 @@ class UsuarioControllerCompradorTest {
   @MockitoBean
   private UsuarioService usuarioService;
 
+  @MockitoBean
+  private AuthService authService;
+
   private static String solicitud(String documento, String rol) {
     return """
         {
@@ -44,6 +52,9 @@ class UsuarioControllerCompradorTest {
           "ubicacionValle": "Cali",
           "tipoDocumento": "CC",
           "documento": "%s",
+          "telefono": "3001234567",
+          "correo": "comprador@agrovalle.test",
+          "contrasena": "AgroValle123!",
           "rol": %s
         }
         """.formatted(documento, rol);
@@ -51,7 +62,7 @@ class UsuarioControllerCompradorTest {
 
   private Usuario compradorGuardado() {
     Usuario usuario = new Usuario();
-    usuario.setId(7L);
+    usuario.setId(7);
     usuario.setNombre("Restaurante El Trapiche");
     usuario.setUbicacionValle("Cali");
     usuario.setTipoDocumento(TipoDocumento.CC);
@@ -68,14 +79,13 @@ class UsuarioControllerCompradorTest {
         .thenReturn(compradorGuardado());
 
     mockMvc.perform(post(URL)
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(solicitud("5550001112", "\"COMPRADOR\"")))
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(solicitud("5550001112", "\"COMPRADOR\"")))
         .andExpect(status().isCreated())
         .andExpect(jsonPath("$.id").value(7))
         .andExpect(jsonPath("$.rol").value("COMPRADOR"));
 
-    ArgumentCaptor<RegistroUsuarioSolicitud> captor =
-        ArgumentCaptor.forClass(RegistroUsuarioSolicitud.class);
+    ArgumentCaptor<RegistroUsuarioSolicitud> captor = ArgumentCaptor.forClass(RegistroUsuarioSolicitud.class);
     verify(usuarioService).registrar(captor.capture());
     assertEquals(TipoUsuario.COMPRADOR, captor.getValue().getRol());
   }
@@ -88,8 +98,8 @@ class UsuarioControllerCompradorTest {
             "Ya existe un usuario registrado con ese documento."));
 
     mockMvc.perform(post(URL)
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(solicitud("5550001112", "\"COMPRADOR\"")))
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(solicitud("5550001112", "\"COMPRADOR\"")))
         .andExpect(status().isConflict())
         .andExpect(jsonPath("$.status").value(409))
         .andExpect(jsonPath("$.codigo").value("DOCUMENTO_DUPLICADO"))
@@ -101,8 +111,8 @@ class UsuarioControllerCompradorTest {
   @DisplayName("Documento con guion: responde 400 y señala el campo documento")
   void documentoInvalidoDebeRetornar400() throws Exception {
     mockMvc.perform(post(URL)
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(solicitud("555-000", "\"COMPRADOR\"")))
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(solicitud("555-000", "\"COMPRADOR\"")))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.codigo").value("VALIDACION_FALLIDA"))
         .andExpect(jsonPath("$.errores[?(@.campo == 'documento')]").isNotEmpty());
@@ -114,8 +124,8 @@ class UsuarioControllerCompradorTest {
   @DisplayName("Rol ausente (null): responde 400 y señala el campo rol")
   void rolAusenteDebeRetornar400() throws Exception {
     mockMvc.perform(post(URL)
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(solicitud("5550001112", "null")))
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(solicitud("5550001112", "null")))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.codigo").value("VALIDACION_FALLIDA"))
         .andExpect(jsonPath("$.errores[?(@.campo == 'rol')]").isNotEmpty());

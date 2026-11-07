@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 
 import com.agrovalle.exception.DocumentoDuplicadoException;
 import com.agrovalle.service.UsuarioService;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import java.time.LocalDate;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -25,6 +26,9 @@ class UsuarioServiceCompradorTest {
   @Mock
   private UsuarioRepository usuarioRepository;
 
+  @Mock
+  private PasswordEncoder passwordEncoder;
+
   @InjectMocks
   private UsuarioService usuarioService;
 
@@ -34,6 +38,9 @@ class UsuarioServiceCompradorTest {
     solicitud.setUbicacionValle("Cali");
     solicitud.setTipoDocumento(TipoDocumento.CC);
     solicitud.setDocumento("5550001112");
+    solicitud.setTelefono("3001234567");
+    solicitud.setCorreo("comprador@agrovalle.test");
+    solicitud.setContrasena("AgroValle123!");
     solicitud.setRol(TipoUsuario.COMPRADOR);
     return solicitud;
   }

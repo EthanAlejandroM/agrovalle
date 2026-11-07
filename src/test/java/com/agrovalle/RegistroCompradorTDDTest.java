@@ -14,6 +14,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,6 +26,8 @@ import org.springframework.transaction.annotation.Transactional;
  * Cada prueba se revierte al terminar (@Transactional), por lo que no se contaminan entre sí.
  */
 @SpringBootTest
+@ActiveProfiles("test")
+@Import(TestSecurityConfig.class)
 @AutoConfigureMockMvc
 @Transactional
 @DisplayName("HU-11: Registro de Compradores (BDD de integración)")
@@ -44,9 +48,12 @@ class RegistroCompradorTDDTest {
           "ubicacionValle": "Cali",
           "tipoDocumento": "CC",
           "documento": "%s",
+          "telefono": "3001234567",
+          "correo": "usuario%s@agrovalle.test",
+          "contrasena": "AgroValle123!",
           "rol": "%s"
         }
-        """.formatted(nombre, documento, rol);
+        """.formatted(nombre, documento, documento, rol);
   }
 
   @Test
@@ -57,8 +64,8 @@ class RegistroCompradorTDDTest {
 
     // When: envía nombre, ubicación del Valle y un documento válido con rol COMPRADOR
     mockMvc.perform(post(URL)
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(solicitud("Restaurante El Trapiche", "5550001112", "COMPRADOR")))
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(solicitud("Restaurante El Trapiche", "5550001112", "COMPRADOR")))
 
         // Then: el sistema responde 201 Created con el id del recurso creado
         .andExpect(status().isCreated())
@@ -82,14 +89,14 @@ class RegistroCompradorTDDTest {
   void documentoDuplicadoNoDebeCrearSegundoRegistro() throws Exception {
     // Given: ya existe un comprador registrado con ese documento
     mockMvc.perform(post(URL)
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(solicitud("Tienda La Esquina", "5550002223", "COMPRADOR")))
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(solicitud("Tienda La Esquina", "5550002223", "COMPRADOR")))
         .andExpect(status().isCreated());
 
     // When: otro usuario intenta registrarse con el mismo documento
     mockMvc.perform(post(URL)
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(solicitud("Otra Persona", "5550002223", "COMPRADOR")))
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(solicitud("Otra Persona", "5550002223", "COMPRADOR")))
 
         // Then: el sistema responde 409 Conflict con un error estructurado
         .andExpect(status().isConflict())
@@ -107,8 +114,8 @@ class RegistroCompradorTDDTest {
     // Given: el usuario ingresa a /api/v1/auth/register
     // When: envía un documento con formato inválido 
     mockMvc.perform(post(URL)
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(solicitud("Nicolle", "555-000", "COMPRADOR")))
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(solicitud("Nicolle", "555-000", "COMPRADOR")))
 
         // Then: el sistema responde 400 Bad Request indicando el campo documento
         .andExpect(status().isBadRequest())
@@ -125,16 +132,16 @@ class RegistroCompradorTDDTest {
     // Given: el mismo endpoint /api/v1/auth/register sirve a agricultores y compradores
     // When: se registra un AGRICULTOR y un COMPRADOR con documentos distintos
     mockMvc.perform(post(URL)
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(solicitud("Finca Dagua", "7770001", "AGRICULTOR")))
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(solicitud("Finca Dagua", "7770001", "AGRICULTOR")))
             
         // Then: ambos responden 201 Created
         .andExpect(status().isCreated())
         .andExpect(jsonPath("$.rol").value("AGRICULTOR"));
 
     mockMvc.perform(post(URL)
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(solicitud("Restaurante Cali", "7770002", "COMPRADOR")))
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(solicitud("Restaurante Cali", "7770002", "COMPRADOR")))
         .andExpect(status().isCreated())
         .andExpect(jsonPath("$.rol").value("COMPRADOR"));
 
@@ -152,14 +159,14 @@ class RegistroCompradorTDDTest {
   void documentoDeAgricultorNoPuedeRegistrarseComoComprador() throws Exception {
     // Given: existe un agricultor registrado con un documento
     mockMvc.perform(post(URL)
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(solicitud("Finca Dagua", "8880001", "AGRICULTOR")))
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(solicitud("Finca Dagua", "8880001", "AGRICULTOR")))
         .andExpect(status().isCreated());
 
     // When: el mismo documento intenta registrarse con rol COMPRADOR
     mockMvc.perform(post(URL)
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(solicitud("Finca Dagua", "8880001", "COMPRADOR")))
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(solicitud("Finca Dagua", "8880001", "COMPRADOR")))
         // Then: el sistema responde 409 Conflict, porque el documento es único por usuario
         .andExpect(status().isConflict())
         .andExpect(jsonPath("$.codigo").value("DOCUMENTO_DUPLICADO"));
