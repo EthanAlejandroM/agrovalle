@@ -137,9 +137,12 @@ public class RegistroUsuarioSteps {
             "ubicacionValle": "Cali",
             "tipoDocumento": "CC",
             "documento": "%s",
+            "telefono": "3001234567",
+            "correo": "usuario%s@agrovalle.test",
+            "contrasena": "AgroValle123!",
             "rol": "%s"
             }
-            """.formatted(nombre, documento, rol);
+            """.formatted(nombre, documento, documento, rol);
   }
 
   private String codigoError() throws Exception {

@@ -15,18 +15,23 @@ import com.agrovalle.TipoDocumento;
 import com.agrovalle.TipoUsuario;
 import com.agrovalle.Usuario;
 import com.agrovalle.exception.DocumentoDuplicadoException;
+import com.agrovalle.service.AuthService;
 import com.agrovalle.service.UsuarioService;
 import java.time.LocalDate;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(UsuarioController.class)
+@ActiveProfiles("test")
+@AutoConfigureMockMvc(addFilters = false)
 @DisplayName("UsuarioController - POST /api/v1/auth/register (HU-01)")
 class UsuarioControllerAgricultorTest {
 
@@ -38,6 +43,9 @@ class UsuarioControllerAgricultorTest {
   @MockitoBean
   private UsuarioService usuarioService;
 
+  @MockitoBean
+  private AuthService authService;
+
   private static String solicitud(String nombre, String documento) {
     return """
                 {
@@ -45,9 +53,12 @@ class UsuarioControllerAgricultorTest {
                 "ubicacionValle": "Dagua",
                 "tipoDocumento": "CC",
                 "documento": "%s",
+                "telefono": "3001234567",
+                "correo": "usuario%s@agrovalle.test",
+                "contrasena": "AgroValle123!",
                 "rol": "AGRICULTOR"
                 }
-                """.formatted(nombre, documento);
+                """.formatted(nombre, documento, documento);
   }
 
   private Usuario usuarioGuardado() {
@@ -88,6 +99,9 @@ class UsuarioControllerAgricultorTest {
                 "ubicacion_valle": "Dagua",
                 "tipoDocumento": "CC",
                 "documento": "1234567890",
+                "telefono": "3001234567",
+                "correo": "ethan@agrovalle.test",
+                "contrasena": "AgroValle123!",
                 "rol": "AGRICULTOR"
                 }
                 """;
@@ -118,7 +132,7 @@ class UsuarioControllerAgricultorTest {
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.codigo").value("VALIDACION_FALLIDA"))
         .andExpect(jsonPath("$.detalle").isNotEmpty())
-        .andExpect(jsonPath("$.errores", hasSize(5)));
+        .andExpect(jsonPath("$.errores", hasSize(8)));
 
     verifyNoInteractions(usuarioService);
   }

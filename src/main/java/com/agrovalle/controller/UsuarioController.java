@@ -6,6 +6,7 @@ import com.agrovalle.RegistroUsuarioSolicitud;
 import com.agrovalle.Usuario;
 import com.agrovalle.service.AuthService;
 import com.agrovalle.service.UsuarioService;
+import java.util.Map;
 
 import jakarta.validation.Valid;
 
@@ -33,14 +34,16 @@ public class UsuarioController {
 
   // Registrar usuario
   @PostMapping("/register")
-  public ResponseEntity<String> registrarUsuario(
+  public ResponseEntity<Map<String, Object>> registrarUsuario(
       @Valid @RequestBody RegistroUsuarioSolicitud solicitud) {
 
     Usuario usuario = usuarioService.registrar(solicitud);
 
-    return ResponseEntity.status(HttpStatus.CREATED)
-        .body("Usuario registrado correctamente con ID: "
-            + usuario.getId());
+    Map<String, Object> respuesta = Map.of(
+        "id", usuario.getId(),
+        "rol", usuario.getRol().name());
+
+    return ResponseEntity.status(HttpStatus.CREATED).body(respuesta);
   }
 
   // Iniciar sesión

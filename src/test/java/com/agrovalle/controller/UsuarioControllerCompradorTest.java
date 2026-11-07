@@ -14,18 +14,23 @@ import com.agrovalle.TipoDocumento;
 import com.agrovalle.TipoUsuario;
 import com.agrovalle.Usuario;
 import com.agrovalle.exception.DocumentoDuplicadoException;
+import com.agrovalle.service.AuthService;
 import com.agrovalle.service.UsuarioService;
 import java.time.LocalDate;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(UsuarioController.class)
+@ActiveProfiles("test")
+@AutoConfigureMockMvc(addFilters = false)
 @DisplayName("UsuarioController - POST /api/v1/auth/register con rol COMPRADOR (HU-11)")
 class UsuarioControllerCompradorTest {
 
@@ -37,6 +42,9 @@ class UsuarioControllerCompradorTest {
   @MockitoBean
   private UsuarioService usuarioService;
 
+  @MockitoBean
+  private AuthService authService;
+
   private static String solicitud(String documento, String rol) {
     return """
         {
@@ -44,6 +52,9 @@ class UsuarioControllerCompradorTest {
           "ubicacionValle": "Cali",
           "tipoDocumento": "CC",
           "documento": "%s",
+          "telefono": "3001234567",
+          "correo": "comprador@agrovalle.test",
+          "contrasena": "AgroValle123!",
           "rol": %s
         }
         """.formatted(documento, rol);
