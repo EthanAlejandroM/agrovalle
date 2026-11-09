@@ -6,4 +6,15 @@ spring:
   
   sql:
     init:
-      mode: always
+      mode: never
+  
+  jpa:
+    hibernate:
+      naming:
+        physical-strategy: com.agrovalle.QuotedAwareNamingStrategy
+      
+jwt:
+  secret: ${JWT_SECRET}
+  expiration-ms: 3600000
+
+  
