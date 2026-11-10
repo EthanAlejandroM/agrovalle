@@ -70,6 +70,16 @@ public class ProductoService {
     }
 
     // Validar las cantidades del lote
+    if (solicitud.getCantidadProducida().compareTo(BigDecimal.ZERO) <= 0) {
+      throw new CantidadLoteInvalidaException(
+          "La cantidad producida debe ser mayor que cero.");
+    }
+
+    if (solicitud.getCantidadDisponible().compareTo(BigDecimal.ZERO) <= 0) {
+      throw new CantidadLoteInvalidaException(
+          "La cantidad disponible debe ser mayor que cero.");
+    }
+
     if (solicitud.getCantidadDisponible().compareTo(
         solicitud.getCantidadProducida()) > 0) {
 
@@ -104,30 +114,16 @@ public class ProductoService {
     // Guardar el lote
     LoteProduccion loteGuardado = loteProduccionRepository.save(lote);
 
-    // Determinar automáticamente el estado del lote
-    EstadoLote estado;
-
-    if (loteGuardado.getCantidadDisponible().compareTo(BigDecimal.ZERO) == 0) {
-      estado = EstadoLote.AGOTADO;
-    } else {
-      estado = EstadoLote.DISPONIBLE;
-    }
-
+  
     // Crear el primer registro de trazabilidad
+    // Como las cantidades siempre son mayores que cero, el lote nace DISPONIBLE.
     EstadoTrazabilidad trazabilidad = new EstadoTrazabilidad();
 
     trazabilidad.setLote(loteGuardado);
     trazabilidad.setFechaHora(OffsetDateTime.now());
-    trazabilidad.setEstadoLote(estado);
-
-    if (estado == EstadoLote.AGOTADO) {
-      trazabilidad.setDescripcion(
-          "Registro inicial del lote. Sin existencias disponibles.");
-    } else {
-      trazabilidad.setDescripcion(
-          "Registro inicial del lote. Stock disponible.");
-    }
-
+    trazabilidad.setEstadoLote(EstadoLote.DISPONIBLE);
+    trazabilidad.setDescripcion(
+        "Registro inicial del lote. Stock disponible.");
     estadoTrazabilidadRepository.save(trazabilidad);
 
     // Devolver el identificador del producto registrado
