@@ -10,7 +10,7 @@ import org.springframework.test.context.ActiveProfiles;
 @CucumberContextConfiguration
 @SpringBootTest
 @ActiveProfiles("test")
-@Import(com.agrovalle.TestSecurityConfig.class)
+@Import(BddSecurityConfig.class)
 @AutoConfigureMockMvc
 public class CucumberSpringConfiguration {
 }
