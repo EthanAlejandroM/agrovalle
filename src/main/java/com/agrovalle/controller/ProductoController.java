@@ -1,6 +1,7 @@
 
 package com.agrovalle.controller;
 
+import java.security.Principal;
 import java.util.Map;
 
 import org.springframework.http.HttpStatus;
@@ -27,9 +28,11 @@ public class ProductoController {
 
   @PostMapping
   public ResponseEntity<Map<String, Object>> registrarProducto(
-      @Valid @RequestBody RegistroProductoSolicitud solicitud) {
+      @Valid @RequestBody RegistroProductoSolicitud solicitud,
+      Principal principal) {
 
-    Integer idProducto = productoService.registrar(solicitud);
+    // principal.getName() es el correo del token validado por JwtAuthenticationFilter
+    Integer idProducto = productoService.registrar(solicitud, principal.getName());
 
     Map<String, Object> respuesta = Map.of(
         "mensaje", "Producto y lote registrados correctamente.",
