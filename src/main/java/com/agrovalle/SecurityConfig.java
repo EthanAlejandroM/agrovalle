@@ -3,7 +3,6 @@ package com.agrovalle;
 import jakarta.servlet.DispatcherType;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import com.agrovalle.UsuarioRepository;
 import com.agrovalle.service.JwtService;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;

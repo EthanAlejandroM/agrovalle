@@ -121,23 +121,6 @@ class ProductoServiceTest {
   }
 
   @Test
-  @DisplayName("Registro con cantidad disponible 0: la trazabilidad inicial queda AGOTADO")
-  void registroSinExistenciasDebeQuedarAgotado() {
-    when(categoriaProductoRepository.findById(1)).thenReturn(Optional.of(categoria()));
-    when(usuarioRepository.findById(2))
-        .thenReturn(Optional.of(usuario(TipoUsuario.AGRICULTOR)));
-    simularGuardado();
-
-    productoService.registrar(solicitud(new BigDecimal("500"), BigDecimal.ZERO));
-
-    ArgumentCaptor<EstadoTrazabilidad> estadoCaptor =
-        ArgumentCaptor.forClass(EstadoTrazabilidad.class);
-    verify(estadoTrazabilidadRepository).save(estadoCaptor.capture());
-    assertEquals(EstadoLote.AGOTADO, estadoCaptor.getValue().getEstadoLote());
-    assertTrue(estadoCaptor.getValue().getDescripcion().contains("Sin existencias"));
-  }
-
-  @Test
   @DisplayName("Categoría inexistente: lanza CategoriaNoEncontradaException y no guarda nada")
   void categoriaInexistenteDebeLanzarExcepcion() {
     when(categoriaProductoRepository.findById(1)).thenReturn(Optional.empty());
@@ -189,6 +172,53 @@ class ProductoServiceTest {
     assertThrows(CantidadLoteInvalidaException.class,
         () -> productoService.registrar(
             solicitud(new BigDecimal("100"), new BigDecimal("150"))));
+
+    verifyNoInteractions(productoRepository, loteProduccionRepository,
+        estadoTrazabilidadRepository);
+  }
+
+  @Test
+  @DisplayName("Cantidad disponible 0: lanza CantidadLoteInvalidaException y no guarda nada")
+  void disponibleCeroDebeSerRechazado() {
+    when(categoriaProductoRepository.findById(1)).thenReturn(Optional.of(categoria()));
+    when(usuarioRepository.findById(2))
+        .thenReturn(Optional.of(usuario(TipoUsuario.AGRICULTOR)));
+
+    CantidadLoteInvalidaException ex = assertThrows(CantidadLoteInvalidaException.class,
+        () -> productoService.registrar(
+            solicitud(new BigDecimal("500"), BigDecimal.ZERO)));
+
+    assertEquals("La cantidad disponible debe ser mayor que cero.", ex.getMessage());
+    verifyNoInteractions(productoRepository, loteProduccionRepository,
+        estadoTrazabilidadRepository);
+  }
+
+  @Test
+  @DisplayName("Cantidad producida 0: lanza CantidadLoteInvalidaException y no guarda nada")
+  void producidaCeroDebeSerRechazado() {
+    when(categoriaProductoRepository.findById(1)).thenReturn(Optional.of(categoria()));
+    when(usuarioRepository.findById(2))
+        .thenReturn(Optional.of(usuario(TipoUsuario.AGRICULTOR)));
+
+    CantidadLoteInvalidaException ex = assertThrows(CantidadLoteInvalidaException.class,
+        () -> productoService.registrar(
+            solicitud(BigDecimal.ZERO, new BigDecimal("10"))));
+
+    assertEquals("La cantidad producida debe ser mayor que cero.", ex.getMessage());
+    verifyNoInteractions(productoRepository, loteProduccionRepository,
+        estadoTrazabilidadRepository);
+  }
+
+  @Test
+  @DisplayName("Producida y disponible en 0: lanza CantidadLoteInvalidaException y no guarda nada")
+  void ambasCantidadesCeroDebenSerRechazadas() {
+    when(categoriaProductoRepository.findById(1)).thenReturn(Optional.of(categoria()));
+    when(usuarioRepository.findById(2))
+        .thenReturn(Optional.of(usuario(TipoUsuario.AGRICULTOR)));
+
+    assertThrows(CantidadLoteInvalidaException.class,
+        () -> productoService.registrar(
+            solicitud(BigDecimal.ZERO, BigDecimal.ZERO)));
 
     verifyNoInteractions(productoRepository, loteProduccionRepository,
         estadoTrazabilidadRepository);

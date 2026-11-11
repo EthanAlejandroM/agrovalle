@@ -17,8 +17,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-  private static final String MENSAJE_DUPLICADO_DOCUMENTO = "Ya existe un usuario registrado con ese documento.";
-
+  
   @ExceptionHandler(MethodArgumentNotValidException.class)
   public ResponseEntity<ApiError> manejarValidacion(MethodArgumentNotValidException ex) {
     List<ApiError.ErrorCampo> errores = ex.getBindingResult().getFieldErrors().stream()

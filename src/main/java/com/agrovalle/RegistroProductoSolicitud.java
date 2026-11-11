@@ -6,7 +6,7 @@ import java.time.LocalDate;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.PositiveOrZero;
+import jakarta.validation.constraints.Positive;
 
 public class RegistroProductoSolicitud {
 
@@ -36,11 +36,11 @@ public class RegistroProductoSolicitud {
   private LocalDate fechaCosecha;
 
   @NotNull(message = "La cantidad producida es obligatoria.")
-  @PositiveOrZero(message = "La cantidad producida no puede ser negativa.")
+  @Positive(message = "La cantidad producida debe ser mayor que cero.")
   private BigDecimal cantidadProducida;
 
   @NotNull(message = "La cantidad disponible es obligatoria.")
-  @PositiveOrZero(message = "La cantidad disponible no puede ser negativa.")
+  @Positive(message = "La cantidad disponible debe ser mayor que cero.")
   private BigDecimal cantidadDisponible;
 
   @NotBlank(message = "La ubicación del lote es obligatoria.")

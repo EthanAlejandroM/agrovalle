@@ -1,6 +1,7 @@
 package com.agrovalle.controller;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -139,5 +140,39 @@ class ProductoControllerTest {
     enviar(solicitud("Tomate chonto", "KILOGRAMO", "100", "150"))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.codigo").value("CANTIDAD_LOTE_INVALIDA"));
+  }
+
+  @Test
+  @DisplayName("Cantidad disponible 0: responde 400 con VALIDACION_FALLIDA")
+  void disponibleCeroDebeRetornar400() throws Exception {
+    enviar(solicitud("Tomate chonto", "KILOGRAMO", "500", "0"))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.codigo").value("VALIDACION_FALLIDA"))
+        .andExpect(jsonPath("$.errores[?(@.campo == 'cantidadDisponible')]").isNotEmpty());
+
+    verifyNoInteractions(productoService);
+  }
+
+  @Test
+  @DisplayName("Cantidad producida 0: responde 400 con VALIDACION_FALLIDA")
+  void producidaCeroDebeRetornar400() throws Exception {
+    enviar(solicitud("Tomate chonto", "KILOGRAMO", "0", "10"))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.codigo").value("VALIDACION_FALLIDA"))
+        .andExpect(jsonPath("$.errores[?(@.campo == 'cantidadProducida')]").isNotEmpty());
+
+    verifyNoInteractions(productoService);
+  }
+
+  @Test
+  @DisplayName("Cantidades negativas: responde 400 con VALIDACION_FALLIDA")
+  void cantidadesNegativasDebenRetornar400() throws Exception {
+    enviar(solicitud("Tomate chonto", "KILOGRAMO", "-5", "-1"))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.codigo").value("VALIDACION_FALLIDA"))
+        .andExpect(jsonPath("$.errores[?(@.campo == 'cantidadProducida')]").isNotEmpty())
+        .andExpect(jsonPath("$.errores[?(@.campo == 'cantidadDisponible')]").isNotEmpty());
+
+    verifyNoInteractions(productoService);
   }
 }
