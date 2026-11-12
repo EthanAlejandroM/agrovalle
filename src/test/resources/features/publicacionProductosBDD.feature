@@ -76,13 +76,25 @@ Característica: Publicación de productos
     Entonces el sistema responde con el código HTTP 401
     Y no se guarda ningún producto
 
-  # Criterio de aceptación de HU-02 que el servicio todavía no valida
-  # (ProductoService no compara fechaCosecha con la fecha actual).
-  # Se excluye de la ejecución con el tag @pendiente (ver RunCucumberTest).
-  # Al implementar la validación, quitar el tag y confirmar el código de error.
-  @pendiente
   Escenario: Rechazar un producto con fecha de cosecha posterior a hoy
     Dado que existe un agricultor autenticado con token JWT
     Cuando publica un producto con fecha de cosecha posterior a la fecha actual
     Entonces el sistema responde con el código HTTP 400
+    Y el sistema informa el error "FECHA_COSECHA_INVALIDA"
+    Y no se guarda ningún producto
+
+  Escenario: Rechazar la publicación a nombre de otro agricultor
+    Dado que existe un agricultor autenticado con token JWT
+    Y que existe otro agricultor registrado
+    Cuando publica un producto a nombre del otro agricultor
+    Entonces el sistema responde con el código HTTP 403
+    Y el sistema informa el error "AGRICULTOR_NO_AUTORIZADO"
+    Y no se guarda ningún producto
+
+  Escenario: Rechazar la publicación de un comprador a nombre de un agricultor
+    Dado que existe un comprador autenticado con token JWT
+    Y que existe otro agricultor registrado
+    Cuando publica un producto a nombre del otro agricultor
+    Entonces el sistema responde con el código HTTP 403
+    Y el sistema informa el error "AGRICULTOR_NO_AUTORIZADO"
     Y no se guarda ningún producto

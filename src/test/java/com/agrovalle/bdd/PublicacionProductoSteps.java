@@ -61,6 +61,7 @@ public class PublicacionProductoSteps {
 
     private final List<Integer> idsProducto = new ArrayList<>();
     private Integer usuarioId;
+    private Integer otroAgricultorId;
     private String tokenAcceso;
     private MvcResult resultado;
 
@@ -80,6 +81,12 @@ public class PublicacionProductoSteps {
     @Dado("que existe un comprador autenticado con token JWT")
     public void compradorAutenticado() throws Exception {
         autenticar("COMPRADOR", "901000002", "comprador.bdd@agrovalle.test");
+    }
+
+    @Dado("que existe otro agricultor registrado")
+    public void otroAgricultorRegistrado() throws Exception {
+        otroAgricultorId = registrarUsuario(
+            "AGRICULTOR", "901000003", "otro.agricultor.bdd@agrovalle.test");
     }
 
     @Dado("que no hay ninguna sesión iniciada")
@@ -121,6 +128,12 @@ public class PublicacionProductoSteps {
     public void publicarConFechaFutura() throws Exception {
         publicar("Tomate chonto", "Hortaliza", 500, 500, 2500,
             ID_CATEGORIA_EXISTENTE, LocalDate.now().plusDays(1));
+    }
+
+    @Cuando("publica un producto a nombre del otro agricultor")
+    public void publicarANombreDeOtroAgricultor() throws Exception {
+        publicarComo(otroAgricultorId, "Tomate chonto", "Hortaliza", 500, 500, 2500,
+            ID_CATEGORIA_EXISTENTE, fechaCosechaValida());
     }
 
   // ----------------------------------------------------------- Entonces
@@ -248,6 +261,24 @@ public class PublicacionProductoSteps {
         int categoriaId,
         LocalDate fechaCosecha) throws Exception {
 
+        publicarComo(usuarioId, nombre, tipo, producida, disponible, precio,
+            categoriaId, fechaCosecha);
+    }
+
+    /**
+     * Publica enviando en el cuerpo el agricultorId indicado, que puede ser
+     * distinto del usuario dueño del token.
+     */
+    private void publicarComo(
+        Integer agricultorId,
+        String nombre,
+        String tipo,
+        int producida,
+        int disponible,
+        int precio,
+        int categoriaId,
+        LocalDate fechaCosecha) throws Exception {
+
         String cuerpo = """
             {
             "categoriaId": %d,
@@ -262,7 +293,7 @@ public class PublicacionProductoSteps {
             "cantidadDisponible": %d,
             "ubicacionLote": "Finca El Paraíso, Dagua"
             }
-            """.formatted(categoriaId, usuarioId, nombre, tipo, precio,
+            """.formatted(categoriaId, agricultorId, nombre, tipo, precio,
             fechaCosecha, producida, disponible);
 
         MockHttpServletRequestBuilder peticion = post(URL_PRODUCTOS)
@@ -273,7 +304,7 @@ public class PublicacionProductoSteps {
         peticion.header(HttpHeaders.AUTHORIZATION, "Bearer " + tokenAcceso);
         }
 
-        resultado = mockMvc.perform(peticion).andReturn();
+    resultado = mockMvc.perform(peticion).andReturn();
 
         if (resultado.getResponse().getStatus() == 201) {
         Integer idProducto = JsonPath.read(
@@ -300,4 +331,3 @@ public class PublicacionProductoSteps {
         }
     }
 }
-
