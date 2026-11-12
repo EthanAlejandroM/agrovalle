@@ -26,7 +26,9 @@ La documentación diferencia los escenarios Gherkin de las pruebas Java de integ
 | HU-02: publicación de productos | Rechazar la publicación hecha por un comprador | Respuesta HTTP 403, código `ROL_AGRICULTOR_INVALIDO` y nada guardado. |
 | HU-02: publicación de productos | Rechazar la publicación sin sesión iniciada | Respuesta HTTP 401 y nada guardado. |
 | HU-02: publicación de productos | Rechazar la publicación con un token JWT inválido | Respuesta HTTP 401 y nada guardado. |
-| HU-02: publicación de productos | Rechazar un producto con fecha de cosecha posterior a hoy | **Pendiente** (`@pendiente`): `ProductoService` aún no valida la fecha; el escenario se excluye de la ejecución hasta implementarla. |
+| HU-02: publicación de productos | Rechazar un producto con fecha de cosecha posterior a hoy | Respuesta HTTP 400, código `FECHA_COSECHA_INVALIDA` y nada guardado. |
+| HU-02: publicación de productos | Rechazar la publicación a nombre de otro agricultor | Respuesta HTTP 403, código `AGRICULTOR_NO_AUTORIZADO` y nada guardado. |
+| HU-02: publicación de productos | Rechazar la publicación de un comprador a nombre de un agricultor | Respuesta HTTP 403, código `AGRICULTOR_NO_AUTORIZADO` y nada guardado. |
 
 Los tres casos de cada historia cubren el registro exitoso, el rechazo de un documento duplicado y el rechazo de un documento inválido. 
 
