@@ -34,6 +34,7 @@ public class Usuario {
   private TipoDocumento tipoDocumento;
 
   @NotBlank
+  @Column(name = "documento", unique = true)
   private String documento;
 
   @NotNull
@@ -47,6 +48,7 @@ public class Usuario {
   private String telefono;
 
   @NotBlank
+  @Column (name = "correo", unique = true)
   private String correo;
 
   @NotBlank
