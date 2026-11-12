@@ -1,9 +1,9 @@
 spring:
   datasource:
-    url: ${DB_URL:jdbc:h2:mem:agrovalle_test;DB_CLOSE_DELAY=-1}
+    url: jdbc:h2:mem:agrovalle_test;MODE=PostgreSQL
     driver-class-name: org.h2.Driver
-    username: ${DB_USERNAME:sa}
-    password: ${DB_PASSWORD:}
+    username: sa
+    password:
   jpa:
     hibernate:
       ddl-auto: create-drop
@@ -12,5 +12,6 @@ spring:
       mode: never
 
 jwt:
-  secret: ${JWT_SECRET:MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=}
+  # Clave de prueba local (32 bytes), solo para el contexto de tests.
+  secret: MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=
   expiration-ms: 3600000
