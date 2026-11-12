@@ -2,6 +2,7 @@ package com.agrovalle.exception;
 
 import java.util.List;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -126,6 +127,85 @@ public class GlobalExceptionHandler {
         HttpStatus.BAD_REQUEST,
         "CANTIDAD_LOTE_INVALIDA",
         ex.getMessage());
+
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+  }
+
+  @ExceptionHandler(FechaCosechaInvalidaException.class)
+  public ResponseEntity<ApiError> manejarFechaCosechaInvalida(
+      FechaCosechaInvalidaException ex) {
+    ApiError error = ApiError.of(
+        HttpStatus.BAD_REQUEST,
+        "FECHA_COSECHA_INVALIDA",
+        ex.getMessage());
+
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+  }
+
+  @ExceptionHandler(AgricultorNoAutorizadoException.class)
+  public ResponseEntity<ApiError> manejarAgricultorNoAutorizado(
+      AgricultorNoAutorizadoException ex) {
+    ApiError error = ApiError.of(
+        HttpStatus.FORBIDDEN,
+        "AGRICULTOR_NO_AUTORIZADO",
+        ex.getMessage());
+
+    return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
+  }
+
+  /**
+   * Control de concurrencia optimista: otro proceso (p. ej. una compra o una
+   * edición manual del inventario) modificó el lote después de que se leyó.
+   * El cliente debe volver a consultar el stock y reintentar.
+   */
+  @ExceptionHandler(OptimisticLockingFailureException.class)
+  public ResponseEntity<ApiError> manejarConflictoConcurrencia(
+      OptimisticLockingFailureException ex) {
+    ApiError error = ApiError.of(
+        HttpStatus.CONFLICT,
+        "CONFLICTO_CONCURRENCIA",
+        "El inventario fue modificado por otra operación. "
+            + "Consulte el stock actualizado e intente de nuevo.");
+
+    return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+  }
+
+  @ExceptionHandler(ProductoNoEncontradoException.class)
+  public ResponseEntity<ApiError> manejarProductoNoEncontrado(ProductoNoEncontradoException ex) {
+    ApiError error = ApiError.of(
+        HttpStatus.NOT_FOUND, "PRODUCTO_NO_ENCONTRADO", ex.getMessage());
+
+    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+  }
+
+  @ExceptionHandler(LoteNoEncontradoException.class)
+  public ResponseEntity<ApiError> manejarLoteNoEncontrado(LoteNoEncontradoException ex) {
+    ApiError error = ApiError.of(
+        HttpStatus.NOT_FOUND, "LOTE_NO_ENCONTRADO", ex.getMessage());
+
+    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+  }
+
+  @ExceptionHandler(CampoNoEditableException.class)
+  public ResponseEntity<ApiError> manejarCampoNoEditable(CampoNoEditableException ex) {
+    ApiError error = ApiError.of(
+        HttpStatus.CONFLICT, "CAMPO_NO_EDITABLE", ex.getMessage());
+
+    return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+  }
+
+  @ExceptionHandler(SolicitudSinCambiosException.class)
+  public ResponseEntity<ApiError> manejarSolicitudSinCambios(SolicitudSinCambiosException ex) {
+    ApiError error = ApiError.of(
+        HttpStatus.BAD_REQUEST, "SOLICITUD_SIN_CAMBIOS", ex.getMessage());
+
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+  }
+
+  @ExceptionHandler(DatosProductoInvalidosException.class)
+  public ResponseEntity<ApiError> manejarDatosProductoInvalidos(DatosProductoInvalidosException ex) {
+    ApiError error = ApiError.of(
+        HttpStatus.BAD_REQUEST, "DATOS_PRODUCTO_INVALIDOS", ex.getMessage());
 
     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
   }
