@@ -9,6 +9,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
@@ -47,6 +48,12 @@ public class LoteProduccion {
   @NotBlank
   private String ubicacionLote;
 
+  // Control de concurrencia optimista: si dos transacciones modifican el mismo
+  // lote (compra + edición manual del inventario), la segunda en confirmar
+  // falla con OptimisticLockingFailureException en lugar de pisar el stock.
+  @Version
+  private Long version;
+
   public LoteProduccion() {
   }
 
@@ -57,6 +64,10 @@ public class LoteProduccion {
 
   public void setIdLote(Integer idLote) {
     this.idLote = idLote;
+  }
+
+  public Long getVersion() {
+    return version;
   }
 
   public String getCodigoLote() {

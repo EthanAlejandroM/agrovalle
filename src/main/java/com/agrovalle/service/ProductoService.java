@@ -2,15 +2,18 @@
 package com.agrovalle.service;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.agrovalle.exception.AgricultorNoAutorizadoException;
 import com.agrovalle.exception.AgricultorNoEncontradoException;
 import com.agrovalle.exception.CantidadLoteInvalidaException;
 import com.agrovalle.exception.CategoriaNoEncontradaException;
+import com.agrovalle.exception.FechaCosechaInvalidaException;
 import com.agrovalle.EstadoLote;
 import com.agrovalle.EstadoTrazabilidad;
 import com.agrovalle.EstadoTrazabilidadRepository;
@@ -48,8 +51,33 @@ public class ProductoService {
     this.estadoTrazabilidadRepository = estadoTrazabilidadRepository;
   }
 
+  /**
+   * Registra un producto con su primer lote.
+   *
+   * @param solicitud       datos del producto y del lote
+   * @param correoAutenticado correo (subject del token) del usuario que hace la
+   *                        petición; el agricultor del cuerpo debe ser esa
+   *                        misma persona
+   */
   @Transactional
-  public Integer registrar(RegistroProductoSolicitud solicitud) {
+  public Integer registrar(RegistroProductoSolicitud solicitud, String correoAutenticado) {
+
+    // El agricultor se identifica por el token, no por el cuerpo.
+    Usuario agricultor = usuarioRepository.findByCorreo(correoAutenticado)
+        .orElseThrow(() -> new AgricultorNoEncontradoException(
+            "El usuario autenticado no existe."));
+
+    // El agricultorId del cuerpo debe coincidir con quien inició sesión.
+    if (!agricultor.getId().equals(solicitud.getAgricultorId())) {
+      throw new AgricultorNoAutorizadoException(
+          "No puede registrar productos a nombre de otro agricultor.");
+    }
+
+    // Verificar que el usuario tenga rol AGRICULTOR
+    if (agricultor.getRol() != TipoUsuario.AGRICULTOR) {
+      throw new RolAgricultorInvalidoException(
+          "El usuario seleccionado no tiene el rol de AGRICULTOR.");
+    }
 
     // Validar que la categoría exista
     var categoria = categoriaProductoRepository.findById(
@@ -57,16 +85,10 @@ public class ProductoService {
         .orElseThrow(() -> new CategoriaNoEncontradaException(
             "La categoría seleccionada no existe."));
 
-    // Buscar al agricultor
-    Usuario agricultor = usuarioRepository.findById(
-        solicitud.getAgricultorId())
-        .orElseThrow(() -> new AgricultorNoEncontradoException(
-            "El usuario seleccionado no existe."));
-
-    // Verificar que el usuario tenga rol AGRICULTOR
-    if (agricultor.getRol() != TipoUsuario.AGRICULTOR) {
-      throw new RolAgricultorInvalidoException(
-          "El usuario seleccionado no tiene el rol de AGRICULTOR.");
+    // La cosecha no puede ser posterior al día en que se crea el producto
+    if (solicitud.getFechaCosecha().isAfter(LocalDate.now())) {
+      throw new FechaCosechaInvalidaException(
+          "La fecha de cosecha no puede ser posterior a la fecha de creación del producto.");
     }
 
     // Validar las cantidades del lote

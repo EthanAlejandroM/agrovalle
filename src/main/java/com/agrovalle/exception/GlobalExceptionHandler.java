@@ -2,6 +2,7 @@ package com.agrovalle.exception;
 
 import java.util.List;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -128,5 +129,44 @@ public class GlobalExceptionHandler {
         ex.getMessage());
 
     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+  }
+
+  @ExceptionHandler(FechaCosechaInvalidaException.class)
+  public ResponseEntity<ApiError> manejarFechaCosechaInvalida(
+      FechaCosechaInvalidaException ex) {
+    ApiError error = ApiError.of(
+        HttpStatus.BAD_REQUEST,
+        "FECHA_COSECHA_INVALIDA",
+        ex.getMessage());
+
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+  }
+
+  @ExceptionHandler(AgricultorNoAutorizadoException.class)
+  public ResponseEntity<ApiError> manejarAgricultorNoAutorizado(
+      AgricultorNoAutorizadoException ex) {
+    ApiError error = ApiError.of(
+        HttpStatus.FORBIDDEN,
+        "AGRICULTOR_NO_AUTORIZADO",
+        ex.getMessage());
+
+    return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
+  }
+
+  /**
+   * Control de concurrencia optimista: otro proceso (p. ej. una compra o una
+   * edición manual del inventario) modificó el lote después de que se leyó.
+   * El cliente debe volver a consultar el stock y reintentar.
+   */
+  @ExceptionHandler(OptimisticLockingFailureException.class)
+  public ResponseEntity<ApiError> manejarConflictoConcurrencia(
+      OptimisticLockingFailureException ex) {
+    ApiError error = ApiError.of(
+        HttpStatus.CONFLICT,
+        "CONFLICTO_CONCURRENCIA",
+        "El inventario fue modificado por otra operación. "
+            + "Consulte el stock actualizado e intente de nuevo.");
+
+    return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
   }
 }
