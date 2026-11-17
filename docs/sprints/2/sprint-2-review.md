@@ -13,7 +13,7 @@
 | HU | Descripción | Puntos | Estado | Observación |
 |---|---|---|---|---|
 | HU-02 | Publicación de Productos | 5 | **Terminada** | Cumple los criterios BDD: JWT, fecha no posterior a hoy e ID de producto único. PR #127 integrado en `develop` el 12 de noviembre. |
-| HU-13 | Control de Inventario | 5 | **Terminada** | La edición de la cantidad del lote, la trazabilidad y el control de concurrencia están en `develop` con pruebas unitarias.  |
+| HU-13 | Control de Inventario | 5 | **Terminada parcialmente** | La edición de la cantidad del lote, la trazabilidad y el control de concurrencia están en `develop` con pruebas unitarias.  |
 
 **Carga planificada:** 10 Story Points (Fibonacci). **Completados según DoD a la fecha de redacción:** 5 (HU-02). 
 
@@ -38,6 +38,15 @@
 **Calidad y pruebas**
 - Pruebas unitarias de servicio y controlador para HU-02 y HU-13, y una prueba de concurrencia del lote.
 - Pruebas BDD de integración de HU-02 (Cucumber + MockMvc + H2). Recorren el flujo real: registro, login para obtener el JWT y publicación, y verifican producto, lote y trazabilidad en base de datos.
+
+---
+
+**Alcance BDD de HU-13 y criterio pendiente**
+
+- El archivo `controlInventarioBDD.feature` tiene **22 casos ejecutables y un escenario `@pendiente`**. La ejecución local de `RunCucumberTest` del 16 de noviembre reportó **41 escenarios, 276 pasos aprobados y un escenario omitido** (`BUILD SUCCESS`). La bitácora atribuye esa ejecución a `feature/HU-13-test-BDD`; el commit y el PR a `develop` quedaron pendientes.
+- El escenario omitido pide que un comprador vea la nueva cantidad disponible. El catálogo no tiene endpoint `GET` para consultar productos y lotes: HU-04 y HU-15 describen filtros de un listado que ninguna historia crea. El equipo evaluó `GET /api/v1/productos/{idProducto}` y decidió no implementarlo por ahora; falta confirmar esa decisión con el equipo/Product Owner.
+- El escenario lleva `@pendiente`; `RunCucumberTest` aplica `not @pendiente` y lo excluye. El último paso aún no está definido en Java. Hoy se valida el inventario consultando la base de datos, no desde la vista del comprador.
+- Cuando se acuerde e implemente la consulta, añadir a `ControlInventarioSteps.java` el paso que consulta el catálogo como comprador, comprobar la nueva cantidad y retirar `@pendiente`.
 
 ---
 
@@ -111,27 +120,38 @@ mvn clean verify
 
 Última ejecución completa registrada (11 de noviembre de 2026, antes del PR #127): 95 pruebas sin fallos ni errores, con 1 omitida; Cucumber con 16 escenarios y 83 pasos aprobados; JaCoCo con 89 % de instrucciones y 85 % de ramas (mínimo exigido: 60 %), con `BUILD SUCCESS`. 
 
+> **Escenario no demostrable todavía:** el comprador ve la nueva cantidad del catálogo. No hay `GET` de productos/lotes; el escenario está etiquetado `@pendiente`, excluido por el runner y sin último paso Java. La verificación actual consulta `LoteProduccionRepository` y JPQL para revisar cantidad, estado más reciente y número de trazas. Eso verifica persistencia, no la respuesta visible al comprador. El endpoint mínimo `GET /api/v1/productos/{idProducto}` se evaluó y se decidió posponer; falta ratificar el alcance. Al implementarlo, completar el paso en `ControlInventarioSteps.java`, verificar la respuesta como comprador y quitar el tag.
+
 ---
 
 ## 4. Verificación del Definition of Done (HU-02)
 
 | Criterio | Cumple | Evidencia |
 |---|---|---|
-| Implementada según la HU y sus criterios BDD | Sí | Demos 2, 4 y 5 |
-| Validaciones implementadas | Sí | Demos 5 y 6; escenarios BDD de precio, cantidades, categoría y rol |
-| Probada, con errores corregidos | Sí | Demo 9; el fallo de pipeline del PR #127 se corrigió antes de integrar |
-| Código revisado por al menos 2 integrantes | Sí | El PR #127 muestra la aprobación de Ethan; falta confirmar la segunda revisión |
-| Operaciones correctas sobre la base de datos | Sí | Demo 3; los escenarios BDD verifican producto, lote y trazabilidad |
-| Documentación actualizada | **Parcial** | `docs/bdd/bdd-doc.md` y documentos del Sprint 2; sin documentación de los endpoints y códigos de error nuevos |
-| Integrada a `develop` sin afectar lo existente | Sí | PR #127 integrado el 12 de noviembre con 2 checks aprobados; las pruebas de HU-01 y HU-11 siguen pasando |
+| Implementada según la HU y sus criterios BDD | Sí, según los PR integrados | PR #127 y escenarios BDD de PR #128. |
+| Validaciones implementadas | Sí, según los escenarios | Demos 4–6; autenticación, fecha, identidad, rol, categoría y cantidades. |
+| Probada, con errores corregidos | Sí, segun los PR integrados | La ejecución citada de 11 nov es anterior a PR #127. |
+| Código revisado por al menos 1 integrante | Sí | Verificar aprobaciones requeridas en PR #127 y #128. |
+| Operaciones correctas sobre la base de datos | Sí, según pruebas documentadas | Demo 3 y consultas a repositorios en `PublicacionProductoSteps.java`. |
+| Documentación actualizada | Sí, segun los PR integrados | `bdd-doc.md` explica escenarios. |
+| Integrada a `develop` sin afectar lo existente | Sí, según bitácora | PR #127 y #128 integrados. |
+
+## Verificación del Definition of Done (HU-13)
+
+| Criterio | Cumple | Evidencia |
+|---|---|---|
+| Implementación de actualización, estados y trazabilidad | Integrada | PR #133, según bitácora del 12 de noviembre. |
+| Pruebas unitarias | Registradas en `develop` | Adjuntar ejecución del pipeline en la versión actual. |
+| Pruebas BDD de integración | Parcial | 22 casos ejecutables y uno `@pendiente`; ejecución local reportada con 41 escenarios aprobados y uno omitido. El commit/PR de HU-13 BDD estaba pendiente el 16 de noviembre. |
+| El comprador ve la cantidad actualizada | Pendiente de decisión y endpoint | No existe consulta GET de catálogo; HU-04/HU-15 presuponen un listado sin definir quién lo implementa. Escenario excluido por `not @pendiente`. |
 
 ---
 
 ## 5. Estado del Product Backlog
 
-Con HU-01 y HU-11 (Sprint 1) y HU-02 (Sprint 2) resueltas, quedan 16 historias en el backlog, y 15 si HU-13 cumple el DoD. Las siguientes en prioridad *Must* son HU-05, HU-06, HU-07, HU-09, HU-10, HU-16, HU-18 y HU-19.
+Con HU-01 y HU-11 (Sprint 1) y HU-02 (Sprint 2) registradas como resueltas, quedan 16 historias. HU-13 no debe contarse como completada según DoD mientras estén pendientes la integración/revisión de la BDD y la decisión sobre el criterio de consulta; al cerrar HU-13 quedarían 15 historias.
 
-HU-19 (Realizar pedido) y HU-16 (Cancelar pedido) descuentan o liberan el stock de los lotes.
+Las siguientes historias en prioridad *Must* son HU-05, HU-06, HU-07, HU-09, HU-10, HU-16, HU-18 y HU-19. HU-19 (Realizar pedido) y HU-16 (Cancelar pedido) dependen de la disponibilidad y liberación correcta del inventario.
 
 ---
 
