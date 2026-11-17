@@ -1,10 +1,10 @@
 # Bitácora de Daily Scrums — AgroValle Connect
 
 **Equipo:** Ethan Alejandro Mezu Quizaboni, Julián David Peña Chocue, Bairon Palacios Urrutia, Nicolle Mera Gomez
-**Periodo cubierto:** Sprint 0 (7–18 de septiembre), Sprint 1 (23–30 de septiembre) y seguimiento del Sprint de Diseño/Sprint 2 (16 de octubre–5 de noviembre de 2026)
+**Periodo cubierto:** Sprint 0 (7–18 de septiembre), Sprint 1 (23–30 de septiembre) y seguimiento del Sprint de Diseño/Sprint 2 (16 de octubre–16 de noviembre de 2026)
 **Formato:** cada Daily responde tres preguntas: ¿qué se hizo desde la última reunión?, ¿qué se hará hasta la próxima? y ¿qué impedimentos existen?
 
-> **Fuentes y alcance:** las entradas de Sprint 0 y Sprint 1 se reconstruyeron a partir de la evidencia disponible en el repositorio. El seguimiento de octubre se basa en transcripciones y notas de reuniones de Teams compartidas por el equipo. Cuando una minuta no permite confirmar un avance o una asistencia, se registra como pendiente de confirmar; el avance reportado no equivale por sí solo al cierre de una tarea.
+> **Fuentes y alcance:** las entradas de Sprint 0 y Sprint 1 se reconstruyeron a partir de la evidencia disponible en el repositorio. El seguimiento de octubre se basa en transcripciones y notas de reuniones de Teams compartidas por el equipo. El seguimiento del 6 al 16 de noviembre se reconstruye a partir del historial de `develop` y de la ejecución local compartida por el equipo, porque el repositorio no conserva minutas de Daily para esas fechas. Cuando una minuta no permite confirmar un avance o una asistencia, se registra como pendiente de confirmar; el avance reportado no equivale por sí solo al cierre de una tarea.
 
 ---
 
@@ -137,7 +137,7 @@
 
 ---
 
-# Sprint de Diseño y seguimiento del Sprint 2 (16 de octubre–5 de noviembre de 2026)
+# Sprint de Diseño y seguimiento del Sprint 2 (16 de octubre–16 de noviembre de 2026)
 
 **Contexto:** desde el inicio del Sprint de Diseño y del Sprint 2, el equipo ha trabajado en cerrar tareas pendientes del Sprint 1 y completar los artefactos de diseño, en paralelo con la preparación del siguiente incremento. Según el equipo, el documento de planificación del Sprint 2 y el tablero GitHub Projects **SPRINTS** ya contienen el Sprint Goal y las tareas con prioridad **Must/Should**.
 
@@ -185,137 +185,31 @@
 
 El `pom.xml` y el workflow de CI ya incluyen el gate global de JaCoCo para instrucciones y ramas, con mínimo de 60 %, además de la ejecución de Maven, pruebas y Checkstyle. En la ejecución local compartida, Maven terminó con `BUILD SUCCESS` y el informe mostró 95 % de instrucciones y 100 % de ramas. La prueba intencional de fallo de CI quedó como siguiente actividad y no se registra aquí como ejecutada.
 
----
+## Seguimiento técnico posterior — 6 al 16 de noviembre de 2026
 
-# Daily 2.5 — 9 de noviembre de 2026
+> **Reconstrucción documental:** no hay transcripciones ni notas de Daily para estas fechas. Las filas se basan en el historial de `develop` (commits y Pull Requests, con autor y fecha) y, para el 16 de noviembre, en la ejecución local de Maven compartida por el integrante. No se atribuyen intervenciones ni se confirma asistencia.
 
-**Fecha:** lunes 9 de noviembre de 2026  
-**Hora:** 8:32 p. m. (hora registrada en la grabación)  
-**Duración:** 47 minutos y 33 segundos  
-**Participantes con intervenciones identificadas:** Ethan Alejandro Mezu Quizaboni y Nicolle Mera Gomez.  
-**Personas mencionadas como ausentes al inicio:** Peña y Urrutia.  
-**Fuente:** transcripción de la reunión de Teams del 9 de noviembre de 2026.
-
-## ¿Qué se hizo desde la última reunión?
-
-Ethan explicó que, durante esa semana y la anterior, se habían realizado ajustes por cuenta propia en los mockups de AgroValle Connect. Entre los cambios mencionó modificaciones en los campos de correo electrónico y contraseña, el color de los botones y el tamaño de algunas casillas. También incorporó los apartados de términos y condiciones y política de privacidad, considerando la seguridad y el tratamiento de datos.
-
-En la vista de inicio del agricultor revisó la distribución de la barra de búsqueda, las notificaciones para facilitar la comunicación con compradores, el acceso a soporte y las categorías para agilizar la búsqueda de productos. También explicó el uso de filtros por fechas de cosecha, de modo que un comprador pueda consultar productos cosechados dentro de un rango determinado.
-
-Durante la reunión se examinó el formulario de publicación de productos y la información relacionada con los lotes. Se discutió la necesidad de diferenciar la cantidad producida de la cantidad disponible y se revisó cómo debía comportarse el estado del lote de acuerdo con el inventario.
-
-## ¿Qué se hará hasta la próxima reunión?
-
-A partir de los acuerdos y propuestas discutidos, quedan como actividades por continuar:
-
-- Ajustar los mockups del formulario de publicación y edición de productos para representar correctamente los campos del lote y sus restricciones.
-- Revisar la pantalla de administración de productos para permitir consultar los lotes asociados a cada producto.
-- Evaluar una tabla o listado de lotes que muestre código, fecha de cosecha y estado; contemplar búsqueda, ordenamiento por fecha y una visualización inicial limitada (se propusieron cinco registros).
-- Definir e implementar la edición de la cantidad disponible cuando el lote siga en estado disponible.
-- Definir el comportamiento de la edición cuando el lote esté agotado y el agricultor registre una nueva cosecha.
-- Revisar los filtros por rango de fechas en las vistas del agricultor y del comprador.
-- Verificar que el inventario agregado que se muestra al comprador tenga en cuenta las cantidades disponibles de los lotes asociados al producto.
-- Contrastar los acuerdos con la lógica de backend y las validaciones existentes para mantener la trazabilidad.
-
-Estas tareas se registran como próximos pasos derivados de la conversación; la transcripción no demuestra que ya se hayan implementado.
-
-## ¿Qué impedimentos existen?
-
-- Se presentaron dudas funcionales sobre la diferencia entre ajustar el inventario de un lote existente por ventas externas y registrar una cosecha nueva. La conversación permitió precisar la distinción, pero todavía requiere trasladarse y verificarse en la implementación.
-- La regla de edición depende del estado del lote, por lo que deben coordinarse validaciones del backend y controles de interfaz.
-- Se debe evitar mezclar existencias de fechas de cosecha distintas, ya que esto afectaría la trazabilidad y la precisión de los filtros por fecha.
-- Se anticipa que la consulta de múltiples lotes para un mismo producto requiere resolver la forma de búsqueda, ordenamiento y visualización de los registros.
-- En la transcripción no se reportó un bloqueo técnico concreto que impidiera continuar; los puntos anteriores corresponden a dudas y trabajo pendiente de definición o implementación.
-
-## Acuerdos funcionales de la reunión
-
-### Publicación inicial del producto y creación del lote
-
-Se revisó que al publicar un producto se registren los datos de producción y se genere automáticamente el código de lote. Entre la información discutida están la fecha de cosecha, la cantidad producida y la cantidad disponible.
-
-Se aclaró que la cantidad disponible puede ser menor que la cantidad producida. Por ejemplo, si se cosecharon 600 unidades y 100 se vendieron por fuera de la plataforma, el agricultor debe poder registrar que solo quedan 500 disponibles. La cantidad disponible nunca debe superar la cantidad producida.
-
-### Edición de un lote que todavía está disponible
-
-Cuando el lote continúa disponible, la edición debe limitarse a la cantidad disponible. Esto permite descontar ventas realizadas por fuera de AgroValle Connect sin alterar la fecha de cosecha ni la cantidad originalmente producida.
-
-La cantidad disponible debe validarse para que no exceda la cantidad producida. El estado del lote depende de esa disponibilidad: si llega a cero, el lote pasa a agotado; si quedan unidades, permanece disponible.
-
-### Lote agotado y nueva cosecha
-
-Se explicó que no se deben cambiar los datos de cosecha de un lote que todavía conserva existencias, porque se mezclaría inventario de fechas distintas. Cuando el lote se agota y se realiza una cosecha nueva, debe registrarse el nuevo ciclo sin combinarlo con las existencias anteriores.
-
-Durante la conversación se distinguió entre reutilizar el mismo producto y registrar un lote distinto para una cosecha posterior. El producto puede conservarse, mientras que una nueva cosecha con fecha y producción diferentes debe tener su propio registro de lote y código para preservar la trazabilidad. La transcripción contiene dudas iniciales sobre cuándo se conserva o se genera el código; el criterio que quedó más claro al final fue crear un lote nuevo cuando hay una nueva cosecha mientras aún existen unidades de un lote anterior. La regla definitiva de actualización cuando un lote se agota debe validarse contra el modelo de datos y la lógica existente antes de implementarse.
-
-### Consulta de lotes y trazabilidad
-
-Se propuso que la edición del producto permita consultar los lotes asociados en una tabla. Como información resumida se mencionaron el código de lote, la fecha de cosecha y el estado. Al seleccionar un lote, el agricultor podría consultar el detalle.
-
-También se discutió ordenar los registros por fecha, buscarlos y mostrar inicialmente cinco lotes, con una opción para consultar más. La finalidad es facilitar la administración cuando un mismo producto tenga varios lotes de distintas cosechas.
-
-### Información y filtros para el comprador
-
-Se conversó sobre mostrar al comprador la disponibilidad del producto considerando los lotes vinculados. Asimismo, se revisó la búsqueda por un rango de fechas de cosecha, para que el comprador pueda encontrar productos cosechados dentro del periodo que le interesa. La vista del agricultor, por su parte, debe permitir consultar sus productos y lotes por fecha.
-
-## Seguimiento de los acuerdos
-
-| Tema | Acuerdo o criterio conversado | Estado al cierre de la reunión |
+| Fecha | Actividad verificable | Evidencia |
 |---|---|---|
-| Código de lote | Generación automática al registrar el lote. | Criterio conversado; validar implementación. |
-| Cantidad producida | Representa la producción asociada al lote. | Criterio conversado. |
-| Cantidad disponible | Puede ser inferior a la producida y debe reflejar ventas externas. | Criterio conversado; requiere validación. |
-| Validación de cantidades | La cantidad disponible no puede ser mayor que la producida. | Criterio conversado; verificar regla en backend. |
-| Estado del lote | Se agota cuando la disponibilidad llega a cero. | Criterio conversado; verificar automatización. |
-| Edición de lote disponible | Solo permitir modificar cantidad disponible. | Acuerdo funcional. |
-| Nueva cosecha | Mantener separados los registros de cosechas diferentes para no mezclar inventario. | Acuerdo funcional; precisar el ciclo de vida del código. |
-| Tabla de lotes | Mostrar código, fecha y estado; valorar búsqueda y ordenamiento. | Propuesta pendiente de diseño/implementación. |
-| Filtro por fechas | Consultar productos o cosechas dentro de un rango. | Requisito revisado; pendiente de validación. |
+| 6–8 nov | Nicolle corrigió archivos y el contexto de pruebas, alineó los nombres de columnas con PostgreSQL, agregó manejo de excepciones por clave incorrecta y pruebas de la clase `Producto` y de login/JWT. | Commits `c1663e9`, `641836b`, `8b51df5`, `e1a281e`, `6560f73`. |
+| 9–10 nov | Se integró el PR #122 (HU-02). Nicolle agregó la validación de cantidades y actualizó los diagramas ER y MER. | PR #122; commits `c06a87a`, `b110b8b`. |
+| 11 nov | Se integraron los PR #125, #126 y #127 (HU-02 y documentación). Nicolle desarrolló la lógica y el control para actualizar productos y lotes, sus excepciones con códigos HTTP, una consulta del estado más reciente del lote y pruebas unitarias de la actualización. | PR #125, #126, #127; commits `a3fefb5`, `d52cca6`, `ce5d2a8`, `b3c81b5`, `b7ea787`, `98c9adb`. |
+| 12 nov | Se integró el PR #128 con las pruebas BDD de HU-02 (pasos, escenarios, fábrica de categorías y documentación; commits de Ethan) y el PR #129 (HU-13). El PR #131 se integró y fue revertido mediante el PR #132; después el PR #133 integró HU-13 en `develop`, con ajustes de Nicolle al YAML (variables de entorno), al mapeo `unique` y al SQL. | PR #128, #129, #131, #132, #133. El historial no documenta el motivo de la reversión. |
+| 16 nov | En la rama `feature/HU-13-test-BDD` se escribieron las pruebas BDD de HU-13 (control de inventario): 22 casos ejecutables más 1 escenario `@pendiente`, y se actualizó `docs/bdd/bdd-doc.md`. La ejecución local de `RunCucumberTest` terminó con 41 escenarios y 276 pasos aprobados, 1 escenario omitido (`@pendiente`) y `BUILD SUCCESS`. | `controlInventarioBDD.feature`, `ControlInventarioSteps.java`, `bdd-doc.md`; salida de Maven compartida. El commit y el Pull Request quedan pendientes de registrar. |
 
-## Registro de Pull Requests y estado del repositorio (consulta del 12 de noviembre de 2026)
+**Alcance de los escenarios de HU-13:** reducir, agotar y reabastecer un lote; cantidades en los límites permitidos; rechazos por cantidad mayor que la producida, cantidad negativa, campos no editables, solicitud vacía y fecha de cosecha futura; y control de acceso (401 sin sesión o con token inválido, 403 para otro agricultor o un comprador, 404 para producto o lote inexistente o de otro producto). Cada escenario verifica el código HTTP, el estado del lote y su trazabilidad.
 
-Esta sección complementa las notas de la reunión con una consulta posterior del repositorio `EthanAlejandroM/agrovalle`, rama `develop`. Los estados siguientes son los que mostraba GitHub al momento de la consulta y no deben interpretarse como acuerdos expresados en la reunión del 9 de noviembre.
+### Decisiones y pendientes
 
-### Pull Requests recientes relevantes
+| # | Tema | Estado |
+|---|---|---|
+| 1 | El criterio de aceptación de HU-13 pide que el cliente vea la nueva cantidad, pero no existe un endpoint `GET` para consultar productos y lotes (HU-04 y HU-15 solo definen filtros sobre un listado que ninguna historia crea). | El escenario queda con el tag `@pendiente`, excluido de la ejecución. Se evaluó crear un `GET /api/v1/productos/{idProducto}` mínimo y se decidió no hacerlo por ahora; falta confirmarlo con el equipo. |
+| 2 | El conflicto de versiones (`CONFLICTO_CONCURRENCIA`) no está cubierto en los escenarios BDD porque es difícil de reproducir de forma estable con `MockMvc`. | Queda fuera del BDD. `LoteProduccionConcurrenciaTest` solo comprueba que el lote tenga campo de versión; el rechazo por conflicto no se ejercita de extremo a extremo. |
+| 3 | Commit y Pull Request de `feature/HU-13-test-BDD` hacia `develop`. | Pendiente. |
 
-| PR | Descripción | Estado consultado | Integración |
-|---|---|---|---|
-| [#128](https://github.com/EthanAlejandroM/agrovalle/pull/128) | Pruebas BDD de HU-02: publicación de productos. Rama `feature/HU-02-test-BDD` hacia `develop`. | **Abierto** al 12 nov 2026. | Pendiente de merge. |
-| [#124](https://github.com/EthanAlejandroM/agrovalle/pull/124) | Release `v1.0.0` con Sprint 0, Sprint 1 y Sprint de Diseño. | Cerrado. | **Fusionado en `main`** el 8 nov 2026. |
-| [#123](https://github.com/EthanAlejandroM/agrovalle/pull/123) | Intento de release desde `develop` hacia `main`. | Cerrado. | No fue fusionado. |
-| [#121](https://github.com/EthanAlejandroM/agrovalle/pull/121) | Marcar checklist de documentación y eliminar carpeta duplicada de imágenes. | Cerrado. | Fusionado en `develop` el 6 nov 2026. |
-| [#120](https://github.com/EthanAlejandroM/agrovalle/pull/120) | Actualización del backlog. | Cerrado. | Fusionado en `develop` el 6 nov 2026. |
-| [#119](https://github.com/EthanAlejandroM/agrovalle/pull/119) | Corrección de diagramas. | Cerrado. | Fusionado en `develop` el 6 nov 2026. |
-| [#118](https://github.com/EthanAlejandroM/agrovalle/pull/118) | Corrección de diagramas. | Cerrado. | Fusionado en `develop` el 6 nov 2026. |
-| [#117](https://github.com/EthanAlejandroM/agrovalle/pull/117) | Prueba de fallo intencional de CI. | Cerrado. | Fusionado en `develop` el 5 nov 2026. |
-| [#116](https://github.com/EthanAlejandroM/agrovalle/pull/116) | Matriz de trazabilidad y documentación. | Cerrado. | Fusionado en `develop` el 5 nov 2026. |
-| [#115](https://github.com/EthanAlejandroM/agrovalle/pull/115) | Configuración de CI. | Cerrado. | Fusionado en `develop` el 22 oct 2026. |
-| [#114](https://github.com/EthanAlejandroM/agrovalle/pull/114) | Configuración de JaCoCo con umbral de cobertura del 60 %. | Cerrado. | Fusionado en `develop` el 22 oct 2026. |
-| [#113](https://github.com/EthanAlejandroM/agrovalle/pull/113) | Refactorización y eliminación de código no utilizado en HU-01. | Cerrado. | Fusionado en `develop` el 22 oct 2026. |
-| [#112](https://github.com/EthanAlejandroM/agrovalle/pull/112) | Checklist de diseño de diagramas UML y mockups. | Cerrado. | Fusionado en `develop` el 22 oct 2026. |
-| [#111](https://github.com/EthanAlejandroM/agrovalle/pull/111) | Pruebas BDD con Cucumber para HU-01 y HU-11. | Cerrado. | Fusionado en `develop` el 22 oct 2026. |
-| [#110](https://github.com/EthanAlejandroM/agrovalle/pull/110) | Refactorización de archivos de pruebas de HU-01 y HU-11. | Cerrado. | Fusionado en `develop` el 22 oct 2026. |
-| [#109](https://github.com/EthanAlejandroM/agrovalle/pull/109) | Cambio de nombre de archivos de prueba. | Cerrado. | Fusionado en `develop` el 22 oct 2026. |
-| [#108](https://github.com/EthanAlejandroM/agrovalle/pull/108) | Cambio de nombre del archivo de pruebas. | Cerrado. | Cerrado sin merge. |
-| [#107](https://github.com/EthanAlejandroM/agrovalle/pull/107) | Creación de carpetas de documentación. | Cerrado. | Fusionado en `develop` el 22 oct 2026. |
-| [#106](https://github.com/EthanAlejandroM/agrovalle/pull/106) | Pruebas Maven de HU-11. | Cerrado. | Fusionado en `develop` el 21 oct 2026. |
-| [#105](https://github.com/EthanAlejandroM/agrovalle/pull/105) | Kanban, métricas y revisión por pares. | Cerrado. | Fusionado en `develop` el 21 oct 2026. |
-| [#104](https://github.com/EthanAlejandroM/agrovalle/pull/104) | Refactorización SOLID de HU-01. | Cerrado. | Fusionado en `develop` el 20 oct 2026. |
-| [#103](https://github.com/EthanAlejandroM/agrovalle/pull/103) | Refactorización SOLID dirigida a una rama de respaldo. | Cerrado. | Fusionado en `backup/develop-antes-de-limpiar-2026-10-19`, no en `develop`. |
-| [#102](https://github.com/EthanAlejandroM/agrovalle/pull/102) | Refactorización SOLID de HU-11. | Cerrado. | Cerrado sin merge. |
+### Impedimentos del 16 de noviembre
 
-
-### Estado del release
-
-El PR #124 integró en `main` el release `v1.0.0` el 8 de noviembre de 2026. Su descripción presenta como alcance consolidado HU-01 y HU-11, persistencia en PostgreSQL, pruebas automatizadas, CI y documentación. También aclara que HU-02 y otras historias permanecían fuera del alcance de esa entrega. Por ello, el PR #128 debe entenderse como trabajo posterior para avanzar en HU-02, no como parte ya liberada de `v1.0.0`.
-
-## Pendientes consolidados después de la reunión y de la consulta del repositorio
-
-1. Dar seguimiento a la revisión y eventual integración del PR #128 de BDD HU-02.
-2. Mantener el escenario de fecha futura identificado como pendiente hasta que la validación funcional correspondiente esté implementada y pueda probarse.
-3. Contrastar las reglas de disponibilidad, agotamiento y creación de lotes nuevas definidas en la reunión con el modelo y los servicios actuales.
-4. Completar o ajustar los mockups de publicación, edición y consulta de lotes.
-5. Resolver la presentación de múltiples lotes por producto, con búsqueda y ordenamiento.
-6. Validar filtros por rango de fecha de cosecha para agricultores y compradores.
-7. Verificar que la disponibilidad mostrada al comprador corresponda a las existencias reales de los lotes.
-
-> **Nota de trazabilidad:** la sección de PR refleja el estado de GitHub consultado el 12 de noviembre de 2026. Los acuerdos funcionales proceden de la transcripción del 9 de noviembre. Las propuestas de interfaz y tareas futuras se mantienen como pendientes mientras no exista evidencia de su implementación o cierre.
+| # | Impedimento | Cómo se resolvió |
+|---|---|---|
+| 1 | La rama `feature/HU-13-test-BDD` estaba desactualizada: no tenía los pasos de HU-02 que HU-13 reutiliza (`que existe la categoría de producto`), los 22 escenarios fallaron como no definidos, el escenario `@pendiente` se ejecutó y el pre-commit de Husky bloqueó el commit. | Se integró `develop` en la rama (`git pull origin develop`). |
+| 2 | Conflicto en `docs/bdd/bdd-doc.md` al recuperar los cambios guardados con `git stash pop`; la versión resultante había perdido la introducción y la sección «Referencias del repositorio». | Se restauró la versión de `develop` y se le aplicó encima el parche de HU-13; el diff contra `origin/develop` quedó con solo dos líneas reemplazadas. |
