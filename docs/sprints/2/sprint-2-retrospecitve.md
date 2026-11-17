@@ -10,9 +10,11 @@
 
 ## 1. Datos del Sprint 2
 
-El equipo planificó 10 Story Points (HU-02 y HU-13, de 5 puntos cada una). A la fecha de redacción, HU-02 cumple el Definition of Done y HU-13 está en cierre: su código y pruebas unitarias están en `develop`, y faltan su prueba BDD de integración y la verificación del DoD.
+El equipo planificó 10 Story Points: HU-02 y HU-13, de 5 puntos cada una. PR #127 integró la implementación de HU-02 el 12 de noviembre; PR #128 integró sus pruebas BDD. PR #133 integró la implementación de HU-13. El 16 de noviembre se reportó una ejecución BDD de HU-13 en la rama `feature/HU-13-test-BDD`, pero el commit y el PR de esas pruebas seguían pendientes de registrar. Por ello, al corte de la bitácora HU-13 continuaba en cierre y no debía darse por terminada según el DoD.
 
-El PR #127 (`feature/HU02`) se integró en `develop` el 12 de noviembre con 2 checks aprobados y cerró los issues T-02.1 a T-02.8 y T-02.10.
+El feature `controlInventarioBDD.feature` contiene 22 casos ejecutables y un escenario etiquetado `@pendiente`. La ejecución local de `RunCucumberTest` reportó 41 escenarios, 276 pasos aprobados, un escenario omitido (`@pendiente`) y `BUILD SUCCESS`.
+
+El escenario omitido requiere que un comprador vea la cantidad disponible después de una actualización. El proyecto no tiene un endpoint `GET` para consultar productos y sus lotes. HU-04 y HU-15 describen filtros sobre un listado, pero ninguna historia define la creación de ese listado. Se evaluó un `GET /api/v1/productos/{idProducto}` mínimo y se decidió no implementarlo entonces; la bitácora deja pendiente confirmar el alcance con el equipo.
 
 ---
 
@@ -31,26 +33,26 @@ El PR #127 (`feature/HU02`) se integró en `develop` el 12 de noviembre con 2 ch
 
 ## 3. Qué salió bien (Sprint 2)
 
-- **Cobertura de pruebas holgada.** En la ejecución del 11 de noviembre, JaCoCo reportó 89 % de instrucciones y 85 % de ramas, frente al mínimo de 60 %, con `BUILD SUCCESS`.
-- **Pruebas BDD de integración reales.** Los escenarios de HU-02 recorren registro, login con JWT y publicación, y verifican el producto, el lote y la trazabilidad en base de datos. Los 16 escenarios de la ejecución del 11 de noviembre pasaron, incluidos los de HU-01 y HU-11.
-- **Los criterios BDD destaparon brechas que se corrigieron.** Al llevar los criterios del backlog a escenarios se vio que faltaba validar que la fecha de cosecha no fuera posterior a hoy y que el agricultor se tomaba del cuerpo de la petición y no del token. El PR #127 corrigió ambas.
-- **Diseño pensado para lo que viene.** El bloqueo optimista del lote (`@Version`) anticipa el conflicto entre compras (HU-19) y ediciones manuales del inventario.
-- **Errores consistentes y trazables.** Las nuevas reglas responden con códigos propios (`FECHA_COSECHA_INVALIDA`, `AGRICULTOR_NO_AUTORIZADO`, `CAMPO_NO_EDITABLE`, `CONFLICTO_CONCURRENCIA`) a través de `GlobalExceptionHandler`.
-- **Batería amplia de pruebas unitarias en HU-13.** Cubre existencia y propiedad del producto, estados del lote, límites de cantidad y concurrencia.
-- **Deuda del Sprint 1 saldada.** Las pruebas de HU-11 quedaron completas.
-- **El CI funcionó como filtro.** El pipeline detectó un fallo en el PR #127, que se corrigió antes de integrar.
+- **HU-02 quedó integrada con pruebas BDD.** PR #127 llevó la publicación con autenticación JWT y validaciones a `develop`; PR #128 integró `PublicacionProductoSteps.java`, los escenarios y su documentación.
+- **Las pruebas de HU-02 verifican el flujo integrado.** Registran un agricultor, obtienen JWT desde `/api/v1/auth/login`, publican en `POST /api/v1/productos` con `Authorization: Bearer` y verifican en `ProductoRepository`, `LoteProduccionRepository` y `EstadoTrazabilidadRepository` la respuesta/persistencia del producto, lote y trazabilidad.
+- **HU-13 cubre el ciclo de vida del lote.** Los escenarios ejecutables incluyen reducción, agotamiento y reabastecimiento, límites de cantidad, errores de solicitud, fechas, permisos y casos de producto/lote inexistente o no asociado.
+- **La verificación de HU-13 comprueba estado e historial, no solo el código HTTP.** `ControlInventarioSteps.java` consulta cantidades mediante `LoteProduccionRepository` y usa JPQL para comprobar el último estado y el número de registros de trazabilidad.
+- **El escenario pendiente quedó identificado explícitamente.** El tag `@pendiente` representa el caso desde la perspectiva del comprador; el runner lo excluye con `not @pendiente`, y el último paso todavía no tiene definición Java. Así se evita contabilizar como aprobado un comportamiento que no se puede consultar por API.
+- **La ejecución BDD fue documentada con su alcance.** El 16 de noviembre se reportaron 22 casos ejecutables más el pendiente en el feature de HU-13 y una corrida local de `RunCucumberTest` con 41 escenarios, 276 pasos aprobados, un escenario omitido y `BUILD SUCCESS`.
+- **La trazabilidad acompaña los cambios de inventario.** La implementación crea eventos para `DISPONIBLE` y `AGOTADO`, y usa control optimista para evitar que una actualización sobreescriba otra.
+- **El CI detectó una falla antes de integrar HU-02.** Según la retrospectiva previa, el pipeline se corrigió antes de completar la integración del PR #127.
 
 ---
 
 ## 4. Qué se puede mejorar (Sprint 2)
 
-- **La planeación no quedó en el repositorio a tiempo.** Es la acción 1 del Sprint 1, que se repite: el archivo seguía como marcador de posición durante el Sprint.
-- **Criterios de la historia implementados tarde.** El backlog ya pedía validar la fecha y que publicara un agricultor autenticado, pero la validación de la fecha y el vínculo del producto con el agricultor del token se completaron al final del Sprint (PR #127), cuando se escribían las pruebas de integración.
-- **Fallo de pipeline y reescritura de historial.** El PR #127 se abrió con 4 commits, entre ellos `fix: the pipeline error is supposed to be fixed`, cuyo mensaje no explica la causa. La rama se reescribió con force-push y el PR se integró con 3 commits. El revisor señaló que se resolvió el problema de autenticación JWT en la ejecución de las pruebas. El hook de pre-commit ejecuta `mvn test` y Checkstyle, mientras que el CI ejecuta `mvn verify` (con JaCoCo) y Checkstyle.
-
-- **Documentación por detrás del código.**
-  - Los endpoints de HU-13 y los códigos de error nuevos no están documentados.
-  - `application.yml` exige la variable `JWT_SECRET`, que el README no menciona.
+- **La planeación se publicó tarde.** Se repitió la acción del Sprint 1: el documento detallado quedó en el repositorio después de iniciado el trabajo; el periodo formal aún requiere confirmación en el tablero.
+- **El criterio de consulta de HU-13 no tenía una dependencia de API definida.** El backlog pide que el comprador vea la cantidad nueva, pero no existe `GET` de catálogo/producto/lotes. HU-04 y HU-15 solo hablan de filtrar un listado que el backlog no encarga a ninguna historia. Se evaluó un `GET /api/v1/productos/{idProducto}` mínimo y se decidió posponerlo; la decisión sigue pendiente de ratificación.
+- **La evidencia BDD debe distinguir ejecución de integración.** Los 22 casos ejecutables y el escenario `@pendiente` se probaron localmente en `feature/HU-13-test-BDD`. Al corte del 16 de noviembre, el commit y PR no estaban registrados; por tanto, esa ejecución no prueba el estado de `develop` ni completa el DoD.
+- **El resultado de persistencia no demuestra visibilidad para el comprador.** Hoy los pasos Java verifican cantidades y trazabilidad en base de datos. El escenario de catálogo se omite y carece de paso Java; no debe describirse como cubierto por esas consultas.
+- **La concurrencia real sigue sin prueba de extremo a extremo.** La bitácora reporta que `LoteProduccionConcurrenciaTest` comprueba la existencia del campo de versión, pero no fuerza dos actualizaciones simultáneas ni comprueba el rechazo `CONFLICTO_CONCURRENCIA`.
+- **La documentación técnica general debe acompañar las APIs.** La bitácora identifica como pendientes la documentación de endpoints/códigos de error y la variable `JWT_SECRET`; además, pide versionar el esquema de todas las tablas.
+- **Falta una ejecución completa de CI sobre el conjunto actual.** La ejecución completa citada en la documentación es del 11 de noviembre, anterior a PR #127. La corrida del 16 de noviembre es de Cucumber local y no sustituye `mvn clean verify` sobre `develop`.
 
 
 ---
@@ -59,13 +61,13 @@ El PR #127 (`feature/HU02`) se integró en `develop` el 12 de noviembre con 2 ch
 
 | # | Acción | Responsable | Plazo | Indicador de cumplimiento |
 |---|---|---|---|---|
-| 1 | Subir `sprint-3-planning.md` a `develop` antes del primer commit funcional del Sprint. | [asignar] | Día 1 del Sprint 3 | Fecha del commit anterior al primer `feat`. |
-| 2 | Ejecutar `mvn clean verify` y `mvn checkstyle:check` en local antes de cada push y de abrir un PR. Evitar el force-push sobre ramas en revisión; si es imprescindible, usar `--force-with-lease` y avisar al revisor. | Todo el equipo | Cada PR | PR sin commits posteriores de tipo `fix` por fallo de pipeline. |
-| 3 | Convertir cada criterio de aceptación de la HU en una prueba al implementarla y marcarlo en la descripción del PR. | Todo el equipo | Cada HU | Cada criterio del backlog tiene prueba o escenario antes de abrir el PR. |
-| 4 | Registrar dos aprobaciones en cada PR, según el DoD. | [asignar] | Cada PR | PR con 2 revisores aprobados antes de integrarse. |
-| 5 | Documentar endpoints, códigos de error y variables de entorno (`JWT_SECRET`) dentro del mismo PR, y versionar el script de esquema de todas las tablas. | [asignar] | Cada PR | PR que cambia la API incluye su cambio en `docs/`; el esquema del repo coincide con las entidades. |
-| 6 | Completar la prueba BDD de integración de HU-13 y cerrar su DoD. | [asignar] | Inicio del Sprint 3 | Escenarios de HU-13 integrados y DoD marcado. |
-| 7 | Registrar cada Daily en la bitácora el mismo día. | Rotativo | Cada día hábil | Una entrada por día en `bitacora-daily-scrum.md`. |
+| 1 | Publicar `sprint-3-planning.md` antes del primer cambio funcional y confirmar fechas, HU y responsables en el tablero. | [asignar] | Día 1 del Sprint 3 | Documento disponible en `develop` antes del primer commit funcional; tablero y documento coinciden. |
+| 2 | Integrar por PR las pruebas BDD de HU-13 y ejecutar la suite completa sobre `develop`. | [asignar] | Antes de cerrar HU-13 | PR revisado, `mvn clean verify` exitoso y reporte adjunto; ningún escenario se contabiliza si está `@pendiente`. |
+| 3 | Resolver con el Product Owner si la consulta del catálogo pertenece a HU-13, HU-04, HU-15 o una HU nueva; si se aprueba, especificar el endpoint y los datos expuestos. | [asignar] | Planning del Sprint 3 | Decisión registrada en backlog/acta. Si se implementa la consulta, paso Java de comprador agregado y `@pendiente` retirado con prueba pasando. |
+| 4 | Diseñar una prueba reproducible de concurrencia sobre la misma versión del lote. | [asignar] | Durante Sprint 3 | Prueba con dos actualizaciones concurrentes verifica una operación aceptada y el error `409 CONFLICTO_CONCURRENCIA` esperado para la otra. |
+| 5 | Documentar endpoints, códigos de error, `JWT_SECRET` y esquema en el mismo PR que introduce cada cambio. | [asignar] | Cada PR | Checklist del PR enlaza documentación y esquema actualizados. |
+| 6 | Registrar cada Daily y la retrospectiva con fecha, acuerdos, responsables y fuentes, separando notas directas de reconstrucciones. | Rotativo | El mismo día | Bitácora actualizada y acuerdos verificables. |
+| 7 | Comprobar revisiones requeridas y CI antes de marcar cada historia como terminada. | Todo el equipo | Cada cierre de HU | Tabla DoD con PR, aprobaciones y ejecución de CI enlazados. |
 
 ---
 
