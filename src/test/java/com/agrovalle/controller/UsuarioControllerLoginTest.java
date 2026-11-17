@@ -6,8 +6,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.agrovalle.AuthResponseSolicitud;
-import com.agrovalle.InicioSesionSolicitud;
+import com.agrovalle.dto.response.AuthResponseSolicitud;
+import com.agrovalle.dto.request.InicioSesionSolicitud;
 import com.agrovalle.service.AuthService;
 import com.agrovalle.service.UsuarioService;
 import org.junit.jupiter.api.DisplayName;

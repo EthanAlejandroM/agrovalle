@@ -8,7 +8,7 @@ import javax.crypto.SecretKey;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import com.agrovalle.Usuario;
+import com.agrovalle.entity.Usuario;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;

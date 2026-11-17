@@ -1,7 +1,7 @@
 package com.agrovalle.bdd;
 
-import com.agrovalle.JwtAuthenticationFilter;
-import com.agrovalle.UsuarioRepository;
+import com.agrovalle.security.JwtAuthenticationFilter;
+import com.agrovalle.repository.UsuarioRepository;
 import com.agrovalle.service.JwtService;
 import jakarta.servlet.DispatcherType;
 import org.springframework.boot.test.context.TestConfiguration;

@@ -11,7 +11,7 @@ spring:
   jpa:
     hibernate:
       naming:
-        physical-strategy: com.agrovalle.QuotedAwareNamingStrategy
+        physical-strategy: com.agrovalle.config.QuotedAwareNamingStrategy
       
 jwt:
   secret: ${JWT_SECRET}

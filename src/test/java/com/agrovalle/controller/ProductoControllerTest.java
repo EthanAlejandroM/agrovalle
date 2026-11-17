@@ -10,8 +10,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.agrovalle.LoteProduccion;
-import com.agrovalle.RegistroProductoSolicitud;
+import com.agrovalle.entity.LoteProduccion;
+import com.agrovalle.dto.request.RegistroProductoSolicitud;
 import com.agrovalle.exception.AgricultorNoAutorizadoException;
 import com.agrovalle.exception.AgricultorNoEncontradoException;
 import com.agrovalle.exception.CantidadLoteInvalidaException;
