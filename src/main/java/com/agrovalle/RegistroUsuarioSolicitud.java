@@ -1,9 +1,11 @@
 package com.agrovalle;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 
 public class RegistroUsuarioSolicitud {
 
@@ -18,12 +20,22 @@ public class RegistroUsuarioSolicitud {
   private TipoDocumento tipoDocumento;
 
   @NotBlank(message = "El documento es obligatorio.")
-  @Pattern(regexp = "^[A-Za-z0-9]+$",
-      message = "El documento solo puede contener letras y números, sin espacios ni guiones.")
+  @Pattern(regexp = "^[A-Za-z0-9]+$", message = "El documento solo puede contener letras y números, sin espacios ni guiones.")
   private String documento;
 
   @NotNull(message = "El rol es obligatorio (AGRICULTOR o COMPRADOR).")
   private TipoUsuario rol;
+
+  @NotBlank(message = "El teléfono es obligatorio.")
+  private String telefono;
+
+  @NotBlank(message = "El correo es obligatorio.")
+  @Email(message = "El correo debe tener un formato válido.")
+  private String correo;
+
+  @NotBlank(message = "La contraseña es obligatoria.")
+  @Size(min = 8, message = "La contraseña debe tener al menos 8 caracteres.")
+  private String contrasena;
 
   public String getNombre() {
     return nombre;
@@ -63,5 +75,29 @@ public class RegistroUsuarioSolicitud {
 
   public void setRol(TipoUsuario rol) {
     this.rol = rol;
+  }
+
+  public String getTelefono() {
+    return telefono;
+  }
+
+  public void setTelefono(String telefono) {
+    this.telefono = telefono;
+  }
+
+  public String getCorreo() {
+    return correo;
+  }
+
+  public void setCorreo(String correo) {
+    this.correo = correo;
+  }
+
+  public String getContrasena() {
+    return contrasena;
+  }
+
+  public void setContrasena(String contrasena) {
+    this.contrasena = contrasena;
   }
 }

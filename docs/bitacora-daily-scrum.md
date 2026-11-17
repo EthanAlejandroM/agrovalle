@@ -1,10 +1,10 @@
 # Bitácora de Daily Scrums — AgroValle Connect
 
 **Equipo:** Ethan Alejandro Mezu Quizaboni, Julián David Peña Chocue, Bairon Palacios Urrutia, Nicolle Mera Gomez
-**Periodo cubierto:** Sprint 0 (7–18 de septiembre), Sprint 1 (23–30 de septiembre) y seguimiento del Sprint de Diseño/Sprint 2 (16 de octubre–5 de noviembre de 2026)
+**Periodo cubierto:** Sprint 0 (7–18 de septiembre), Sprint 1 (23–30 de septiembre) y seguimiento del Sprint de Diseño/Sprint 2 (16 de octubre–16 de noviembre de 2026)
 **Formato:** cada Daily responde tres preguntas: ¿qué se hizo desde la última reunión?, ¿qué se hará hasta la próxima? y ¿qué impedimentos existen?
 
-> **Fuentes y alcance:** las entradas de Sprint 0 y Sprint 1 se reconstruyeron a partir de la evidencia disponible en el repositorio. El seguimiento de octubre se basa en transcripciones y notas de reuniones de Teams compartidas por el equipo. Cuando una minuta no permite confirmar un avance o una asistencia, se registra como pendiente de confirmar; el avance reportado no equivale por sí solo al cierre de una tarea.
+> **Fuentes y alcance:** las entradas de Sprint 0 y Sprint 1 se reconstruyeron a partir de la evidencia disponible en el repositorio. El seguimiento de octubre se basa en transcripciones y notas de reuniones de Teams compartidas por el equipo. El seguimiento del 6 al 16 de noviembre se reconstruye a partir del historial de `develop` y de la ejecución local compartida por el equipo, porque el repositorio no conserva minutas de Daily para esas fechas. Cuando una minuta no permite confirmar un avance o una asistencia, se registra como pendiente de confirmar; el avance reportado no equivale por sí solo al cierre de una tarea.
 
 ---
 
@@ -137,7 +137,7 @@
 
 ---
 
-# Sprint de Diseño y seguimiento del Sprint 2 (16 de octubre–5 de noviembre de 2026)
+# Sprint de Diseño y seguimiento del Sprint 2 (16 de octubre–16 de noviembre de 2026)
 
 **Contexto:** desde el inicio del Sprint de Diseño y del Sprint 2, el equipo ha trabajado en cerrar tareas pendientes del Sprint 1 y completar los artefactos de diseño, en paralelo con la preparación del siguiente incremento. Según el equipo, el documento de planificación del Sprint 2 y el tablero GitHub Projects **SPRINTS** ya contienen el Sprint Goal y las tareas con prioridad **Must/Should**.
 
@@ -184,3 +184,32 @@
 ## Actualización técnica posterior — 4 y 5 de noviembre de 2026
 
 El `pom.xml` y el workflow de CI ya incluyen el gate global de JaCoCo para instrucciones y ramas, con mínimo de 60 %, además de la ejecución de Maven, pruebas y Checkstyle. En la ejecución local compartida, Maven terminó con `BUILD SUCCESS` y el informe mostró 95 % de instrucciones y 100 % de ramas. La prueba intencional de fallo de CI quedó como siguiente actividad y no se registra aquí como ejecutada.
+
+## Seguimiento técnico posterior — 6 al 16 de noviembre de 2026
+
+> **Reconstrucción documental:** no hay transcripciones ni notas de Daily para estas fechas. Las filas se basan en el historial de `develop` (commits y Pull Requests, con autor y fecha) y, para el 16 de noviembre, en la ejecución local de Maven compartida por el integrante. No se atribuyen intervenciones ni se confirma asistencia.
+
+| Fecha | Actividad verificable | Evidencia |
+|---|---|---|
+| 6–8 nov | Nicolle corrigió archivos y el contexto de pruebas, alineó los nombres de columnas con PostgreSQL, agregó manejo de excepciones por clave incorrecta y pruebas de la clase `Producto` y de login/JWT. | Commits `c1663e9`, `641836b`, `8b51df5`, `e1a281e`, `6560f73`. |
+| 9–10 nov | Se integró el PR #122 (HU-02). Nicolle agregó la validación de cantidades y actualizó los diagramas ER y MER. | PR #122; commits `c06a87a`, `b110b8b`. |
+| 11 nov | Se integraron los PR #125, #126 y #127 (HU-02 y documentación). Nicolle desarrolló la lógica y el control para actualizar productos y lotes, sus excepciones con códigos HTTP, una consulta del estado más reciente del lote y pruebas unitarias de la actualización. | PR #125, #126, #127; commits `a3fefb5`, `d52cca6`, `ce5d2a8`, `b3c81b5`, `b7ea787`, `98c9adb`. |
+| 12 nov | Se integró el PR #128 con las pruebas BDD de HU-02 (pasos, escenarios, fábrica de categorías y documentación; commits de Ethan) y el PR #129 (HU-13). El PR #131 se integró y fue revertido mediante el PR #132; después el PR #133 integró HU-13 en `develop`, con ajustes de Nicolle al YAML (variables de entorno), al mapeo `unique` y al SQL. | PR #128, #129, #131, #132, #133. El historial no documenta el motivo de la reversión. |
+| 16 nov | En la rama `feature/HU-13-test-BDD` se escribieron las pruebas BDD de HU-13 (control de inventario): 22 casos ejecutables más 1 escenario `@pendiente`, y se actualizó `docs/bdd/bdd-doc.md`. La ejecución local de `RunCucumberTest` terminó con 41 escenarios y 276 pasos aprobados, 1 escenario omitido (`@pendiente`) y `BUILD SUCCESS`. | `controlInventarioBDD.feature`, `ControlInventarioSteps.java`, `bdd-doc.md`; salida de Maven compartida. El commit y el Pull Request quedan pendientes de registrar. |
+
+**Alcance de los escenarios de HU-13:** reducir, agotar y reabastecer un lote; cantidades en los límites permitidos; rechazos por cantidad mayor que la producida, cantidad negativa, campos no editables, solicitud vacía y fecha de cosecha futura; y control de acceso (401 sin sesión o con token inválido, 403 para otro agricultor o un comprador, 404 para producto o lote inexistente o de otro producto). Cada escenario verifica el código HTTP, el estado del lote y su trazabilidad.
+
+### Decisiones y pendientes
+
+| # | Tema | Estado |
+|---|---|---|
+| 1 | El criterio de aceptación de HU-13 pide que el cliente vea la nueva cantidad, pero no existe un endpoint `GET` para consultar productos y lotes (HU-04 y HU-15 solo definen filtros sobre un listado que ninguna historia crea). | El escenario queda con el tag `@pendiente`, excluido de la ejecución. Se evaluó crear un `GET /api/v1/productos/{idProducto}` mínimo y se decidió no hacerlo por ahora; falta confirmarlo con el equipo. |
+| 2 | El conflicto de versiones (`CONFLICTO_CONCURRENCIA`) no está cubierto en los escenarios BDD porque es difícil de reproducir de forma estable con `MockMvc`. | Queda fuera del BDD. `LoteProduccionConcurrenciaTest` solo comprueba que el lote tenga campo de versión; el rechazo por conflicto no se ejercita de extremo a extremo. |
+| 3 | Commit y Pull Request de `feature/HU-13-test-BDD` hacia `develop`. | Pendiente. |
+
+### Impedimentos del 16 de noviembre
+
+| # | Impedimento | Cómo se resolvió |
+|---|---|---|
+| 1 | La rama `feature/HU-13-test-BDD` estaba desactualizada: no tenía los pasos de HU-02 que HU-13 reutiliza (`que existe la categoría de producto`), los 22 escenarios fallaron como no definidos, el escenario `@pendiente` se ejecutó y el pre-commit de Husky bloqueó el commit. | Se integró `develop` en la rama (`git pull origin develop`). |
+| 2 | Conflicto en `docs/bdd/bdd-doc.md` al recuperar los cambios guardados con `git stash pop`; la versión resultante había perdido la introducción y la sección «Referencias del repositorio». | Se restauró la versión de `develop` y se le aplicó encima el parche de HU-13; el diff contra `origin/develop` quedó con solo dos líneas reemplazadas. |

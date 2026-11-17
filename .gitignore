@@ -32,3 +32,6 @@ replay_pid*
 
 # Node.js / Husky
 /node_modules/
+
+# VS Code
+.vscode/

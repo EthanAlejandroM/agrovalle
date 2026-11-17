@@ -32,7 +32,7 @@
 
 **When:** Publica un producto con tipo, cantidad y `precio`.
 
-**Then:** El sistema valida que la fecha no sea anterior a hoy y retorna un ID de producto único.
+**Then:** El sistema valida que la fecha no sea futura a hoy y retorna un ID de producto único.
 
 ---
 
