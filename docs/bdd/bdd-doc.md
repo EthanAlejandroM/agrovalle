@@ -2,7 +2,7 @@
 
 ## Propósito y enfoque
 
-Las pruebas BDD describen el comportamiento esperado desde el punto de vista de una persona. Los archivos están vinculados a las historias HU-01 (registro de agricultores), HU-11 (registro de compradores) y HU-02 (publicación de productos).
+Las pruebas BDD describen el comportamiento esperado desde el punto de vista de una persona. Los archivos están vinculados a las historias HU-01 (registro de agricultores), HU-11 (registro de compradores), HU-02 (publicación de productos) y HU-13 (control de inventario).
 
 La documentación diferencia los escenarios Gherkin de las pruebas Java de integración que verifican comportamientos relacionados. Así se puede saber qué está expresado como BDD sin sumar pruebas de otra forma como si fueran escenarios `.feature`.
 
@@ -29,10 +29,33 @@ La documentación diferencia los escenarios Gherkin de las pruebas Java de integ
 | HU-02: publicación de productos | Rechazar un producto con fecha de cosecha posterior a hoy | Respuesta HTTP 400, código `FECHA_COSECHA_INVALIDA` y nada guardado. |
 | HU-02: publicación de productos | Rechazar la publicación a nombre de otro agricultor | Respuesta HTTP 403, código `AGRICULTOR_NO_AUTORIZADO` y nada guardado. |
 | HU-02: publicación de productos | Rechazar la publicación de un comprador a nombre de un agricultor | Respuesta HTTP 403, código `AGRICULTOR_NO_AUTORIZADO` y nada guardado. |
+| HU-13: control de inventario | Reducir la cantidad disponible de un lote | Respuesta HTTP 200, lote en estado `DISPONIBLE` con la nueva cantidad, producción sin cambios y un registro de trazabilidad nuevo. |
+| HU-13: control de inventario | Aceptar cantidades disponibles en los límites permitidos (1 y la cantidad producida) | Respuesta HTTP 200 y lote `DISPONIBLE` con la cantidad indicada. |
+| HU-13: control de inventario | Agotar un lote al dejar la cantidad disponible en cero | Respuesta HTTP 200, `estadoLote` `AGOTADO` y trazabilidad `AGOTADO`. |
+| HU-13: control de inventario | Reabastecer un lote agotado con nueva producción y fecha de cosecha | Respuesta HTTP 200, lote de nuevo `DISPONIBLE` con producción y disponible actualizados y trazabilidad `DISPONIBLE`. |
+| HU-13: control de inventario | Reabastecer un lote agotado indicando solo la cantidad disponible | Respuesta HTTP 200, lote `DISPONIBLE` y producción sin cambios. |
+| HU-13: control de inventario | Rechazar una cantidad disponible mayor que la producida | Respuesta HTTP 400, código `CANTIDAD_LOTE_INVALIDA` e inventario sin cambios. |
+| HU-13: control de inventario | Rechazar una cantidad disponible negativa | Respuesta HTTP 400, código `VALIDACION_FALLIDA` e inventario sin cambios. |
+| HU-13: control de inventario | Rechazar el cambio de cantidad producida o de fecha de cosecha en un lote disponible (2 escenarios) | Respuesta HTTP 409, código `CAMPO_NO_EDITABLE` e inventario sin cambios. |
+| HU-13: control de inventario | Rechazar una actualización sin ningún campo | Respuesta HTTP 400, código `SOLICITUD_SIN_CAMBIOS` e inventario sin cambios. |
+| HU-13: control de inventario | Rechazar reabastecer un lote agotado con cantidad cero, sin cantidad disponible o con disponible mayor que la nueva producción (3 escenarios) | Respuesta HTTP 400, código `CANTIDAD_LOTE_INVALIDA` e inventario sin cambios. |
+| HU-13: control de inventario | Rechazar reabastecer un lote agotado con fecha de cosecha posterior a hoy | Respuesta HTTP 400, código `FECHA_COSECHA_INVALIDA` e inventario sin cambios. |
+| HU-13: control de inventario | Rechazar la actualización hecha por otro agricultor o por un comprador (2 escenarios) | Respuesta HTTP 403, código `AGRICULTOR_NO_AUTORIZADO` e inventario sin cambios. |
+| HU-13: control de inventario | Rechazar la actualización sin sesión iniciada o con un token JWT inválido (2 escenarios) | Respuesta HTTP 401 e inventario sin cambios. |
+| HU-13: control de inventario | Rechazar la actualización de un producto que no existe | Respuesta HTTP 404 y código `PRODUCTO_NO_ENCONTRADO`. |
+| HU-13: control de inventario | Rechazar la actualización de un lote que no existe o que pertenece a otro producto (2 escenarios) | Respuesta HTTP 404, código `LOTE_NO_ENCONTRADO` e inventario sin cambios. |
 
 Los tres casos de cada historia cubren el registro exitoso, el rechazo de un documento duplicado y el rechazo de un documento inválido. 
 
-Archivos: [publicacionProductosBDD.feature](https://github.com/EthanAlejandroM/agrovalle/blob/develop/src/test/resources/features/publicacionProductosBDD.feature), [registroAgricultoresBDD.feature](https://github.com/EthanAlejandroM/agrovalle/blob/develop/src/test/resources/features/registroAgricultoresBDD.feature) y [registroCompradoresBDD.feature](https://github.com/EthanAlejandroM/agrovalle/blob/develop/src/test/resources/features/registroCompradoresBDD.feature).
+> [!IMPORTANT]
+> **HU-13 tiene un escenario pendiente:** «El comprador ve la nueva cantidad disponible después de la actualización».
+>
+> - **Por qué está pendiente:** el criterio de aceptación de la historia pide que el cliente vea la nueva cantidad, pero todavía no existe un endpoint `GET` para consultar productos y sus lotes. HU-04 y HU-15 solo definen filtros sobre un listado que ninguna historia crea.
+> - **Cómo se excluye:** el escenario lleva el tag `@pendiente` y `RunCucumberTest` lo omite (`not @pendiente`). Su último paso aún no tiene definición en Java.
+> - **Qué se verifica hoy:** el efecto de la actualización sobre el inventario se comprueba contra la base de datos (`LoteProduccionRepository` y trazabilidad), no desde la perspectiva del comprador.
+> - **Cómo retomarlo:** cuando exista la consulta, se implementa el paso «un comprador que consulta el catálogo ve … con … unidades disponibles» en `ControlInventarioSteps.java` y se retira el tag `@pendiente`.
+
+Archivos: [controlInventarioBDD.feature](https://github.com/EthanAlejandroM/agrovalle/blob/develop/src/test/resources/features/controlInventarioBDD.feature), [publicacionProductosBDD.feature](https://github.com/EthanAlejandroM/agrovalle/blob/develop/src/test/resources/features/publicacionProductosBDD.feature), [registroAgricultoresBDD.feature](https://github.com/EthanAlejandroM/agrovalle/blob/develop/src/test/resources/features/registroAgricultoresBDD.feature) y [registroCompradoresBDD.feature](https://github.com/EthanAlejandroM/agrovalle/blob/develop/src/test/resources/features/registroCompradoresBDD.feature).
 
 ## Cómo se implementan
 
@@ -40,6 +63,7 @@ Archivos: [publicacionProductosBDD.feature](https://github.com/EthanAlejandroM/a
 
 - [CucumberSpringConfiguration.java](https://github.com/EthanAlejandroM/agrovalle/blob/develop/src/test/java/com/agrovalle/bdd/CucumberSpringConfiguration.java) integra los escenarios con Spring Boot y configura `MockMvc`.
 - [PublicacionProductoSteps.java](https://github.com/EthanAlejandroM/agrovalle/blob/develop/src/test/java/com/agrovalle/bdd/PublicacionProductoSteps.java) implementa los pasos de HU-02. Registra un usuario, inicia sesión en `/api/v1/auth/login` para obtener el JWT y publica en `POST /api/v1/productos` con `Authorization: Bearer`. Verifica en `ProductoRepository`, `LoteProduccionRepository` y `EstadoTrazabilidadRepository` lo que quedó guardado.
+- [ControlInventarioSteps.java](https://github.com/EthanAlejandroM/agrovalle/blob/develop/src/test/java/com/agrovalle/bdd/ControlInventarioSteps.java) implementa los pasos de HU-13. Registra y autentica usuarios, publica el producto con `POST /api/v1/productos` y actualiza el lote con `PATCH /api/v1/productos/{idProducto}/lotes/{idLote}` usando `Authorization: Bearer`. Verifica en `LoteProduccionRepository` las cantidades guardadas y, con una consulta JPQL, el último estado y el número de registros de trazabilidad del lote. Es independiente de `PublicacionProductoSteps` (token y respuesta propios) y usa redacciones de pasos distintas para evitar definiciones duplicadas en Cucumber.
 - [BddSecurityConfig.java](https://github.com/EthanAlejandroM/agrovalle/blob/develop/src/test/java/com/agrovalle/bdd/BddSecurityConfig.java) replica la cadena de `SecurityConfig` (que no se carga con el perfil `test`) para que el JWT se exija de verdad en las pruebas BDD. Si cambia `SecurityConfig`, debe actualizarse también.
 - [CategoriaProductoFabrica.java](https://github.com/EthanAlejandroM/agrovalle/blob/develop/src/test/java/com/agrovalle/CategoriaProductoFabrica.java) crea categorías de prueba, ya que `CategoriaProducto` tiene constructor `protected`.
 - [Hooks.java](https://github.com/EthanAlejandroM/agrovalle/blob/develop/src/test/java/com/agrovalle/bdd/Hooks.java) vacía las tablas antes de cada escenario para aislar sus datos, en orden inverso a las llaves foráneas (trazabilidad, lote, producto, categoría y usuario).
