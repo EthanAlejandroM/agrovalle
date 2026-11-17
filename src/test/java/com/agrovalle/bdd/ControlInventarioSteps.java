@@ -5,9 +5,9 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
-import com.agrovalle.EstadoLote;
-import com.agrovalle.LoteProduccion;
-import com.agrovalle.LoteProduccionRepository;
+import com.agrovalle.enums.EstadoLote;
+import com.agrovalle.entity.LoteProduccion;
+import com.agrovalle.repository.LoteProduccionRepository;
 import com.jayway.jsonpath.JsonPath;
 import io.cucumber.java.es.Cuando;
 import io.cucumber.java.es.Dado;

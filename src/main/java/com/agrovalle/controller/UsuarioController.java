@@ -1,9 +1,9 @@
 package com.agrovalle.controller;
 
-import com.agrovalle.AuthResponseSolicitud;
-import com.agrovalle.InicioSesionSolicitud;
-import com.agrovalle.RegistroUsuarioSolicitud;
-import com.agrovalle.Usuario;
+import com.agrovalle.dto.response.AuthResponseSolicitud;
+import com.agrovalle.dto.request.InicioSesionSolicitud;
+import com.agrovalle.dto.request.RegistroUsuarioSolicitud;
+import com.agrovalle.entity.Usuario;
 import com.agrovalle.service.AuthService;
 import com.agrovalle.service.UsuarioService;
 import java.util.Map;

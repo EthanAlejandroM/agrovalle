@@ -1,10 +1,10 @@
 
 package com.agrovalle.service;
 
-import com.agrovalle.Usuario;
-import com.agrovalle.UsuarioRepository;
-import com.agrovalle.InicioSesionSolicitud;
-import com.agrovalle.AuthResponseSolicitud;
+import com.agrovalle.entity.Usuario;
+import com.agrovalle.repository.UsuarioRepository;
+import com.agrovalle.dto.request.InicioSesionSolicitud;
+import com.agrovalle.dto.response.AuthResponseSolicitud;
 
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;

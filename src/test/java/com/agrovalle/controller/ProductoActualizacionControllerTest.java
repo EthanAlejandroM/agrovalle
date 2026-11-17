@@ -11,9 +11,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.agrovalle.ActualizarLoteSolicitud;
-import com.agrovalle.ActualizarProductoSolicitud;
-import com.agrovalle.EstadoLote;
+import com.agrovalle.dto.request.ActualizarLoteSolicitud;
+import com.agrovalle.dto.request.ActualizarProductoSolicitud;
+import com.agrovalle.enums.EstadoLote;
 import com.agrovalle.exception.AgricultorNoAutorizadoException;
 import com.agrovalle.exception.CampoNoEditableException;
 import com.agrovalle.exception.CantidadLoteInvalidaException;

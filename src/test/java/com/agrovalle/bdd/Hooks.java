@@ -1,10 +1,10 @@
 package com.agrovalle.bdd;
 
-import com.agrovalle.CategoriaProductoRepository;
-import com.agrovalle.EstadoTrazabilidadRepository;
-import com.agrovalle.LoteProduccionRepository;
-import com.agrovalle.ProductoRepository;
-import com.agrovalle.UsuarioRepository;
+import com.agrovalle.repository.CategoriaProductoRepository;
+import com.agrovalle.repository.EstadoTrazabilidadRepository;
+import com.agrovalle.repository.LoteProduccionRepository;
+import com.agrovalle.repository.ProductoRepository;
+import com.agrovalle.repository.UsuarioRepository;
 import io.cucumber.java.Before;
 import org.springframework.beans.factory.annotation.Autowired;
 

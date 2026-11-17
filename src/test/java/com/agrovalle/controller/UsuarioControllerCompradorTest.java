@@ -9,10 +9,10 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.agrovalle.RegistroUsuarioSolicitud;
-import com.agrovalle.TipoDocumento;
-import com.agrovalle.TipoUsuario;
-import com.agrovalle.Usuario;
+import com.agrovalle.dto.request.RegistroUsuarioSolicitud;
+import com.agrovalle.enums.TipoDocumento;
+import com.agrovalle.enums.TipoUsuario;
+import com.agrovalle.entity.Usuario;
 import com.agrovalle.exception.DocumentoDuplicadoException;
 import com.agrovalle.service.AuthService;
 import com.agrovalle.service.UsuarioService;
