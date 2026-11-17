@@ -1,5 +1,9 @@
 package com.agrovalle.bdd;
 
+import com.agrovalle.CategoriaProductoRepository;
+import com.agrovalle.EstadoTrazabilidadRepository;
+import com.agrovalle.LoteProduccionRepository;
+import com.agrovalle.ProductoRepository;
 import com.agrovalle.UsuarioRepository;
 import io.cucumber.java.Before;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,8 +17,26 @@ public class Hooks {
   @Autowired
   private UsuarioRepository usuarioRepository;
 
+  @Autowired
+  private CategoriaProductoRepository categoriaProductoRepository;
+
+  @Autowired
+  private ProductoRepository productoRepository;
+
+  @Autowired
+  private LoteProduccionRepository loteProduccionRepository;
+
+  @Autowired
+  private EstadoTrazabilidadRepository estadoTrazabilidadRepository;
+
   @Before
   public void limpiarBaseDeDatos() {
+    // Orden inverso a las llaves foráneas: trazabilidad -> lote -> producto
+    // -> categoría y usuario.
+    estadoTrazabilidadRepository.deleteAll();
+    loteProduccionRepository.deleteAll();
+    productoRepository.deleteAll();
+    categoriaProductoRepository.deleteAll();
     usuarioRepository.deleteAll();
   }
 }

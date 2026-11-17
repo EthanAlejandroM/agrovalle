@@ -26,7 +26,7 @@ public class LoteProduccion {
   private Integer idLote;
 
   @NotBlank
-  @Column(name = "codigo_lote")
+  @Column(name = "codigo_lote", unique = true)
   private String codigoLote;
 
   // Relación con Producto obligada
