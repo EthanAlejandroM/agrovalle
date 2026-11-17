@@ -328,7 +328,7 @@
 
 ## HU-19: Realizar Pedido
 
-**Como Comprador**, quiero confirmar mi pedido desde el carrito de compras, para seleccionar el método de entrega, la dirección y finalizar la solicitud con el agricultor.
+**Como Comprador**, quiero confirmar mi pedido desde el carrito de compras, para seleccionar la dirección y finalizar la solicitud con el agricultor.
 
 **Priorización:** Must
 
@@ -338,6 +338,22 @@
 
 **Given:** El cliente tiene productos en su carrito de compras y ha iniciado sesión.
 
-**When:** El cliente confirma la dirección de entrega, selecciona el método de entrega y presiona "Realizar pedido".
+**When:** El cliente confirma la dirección de entrega y presiona "Realizar pedido".
 
 **Then:** El sistema registra el pedido en estado "Pendiente", descuenta el stock de los productos, genera la orden de compra y notifica al agricultor. Después, la HU-07 se encarga del pago.
+
+## HU-20: Visualizar Catálogo de Productos
+
+**Como Usuario (Comprador o Agricultor)**, quiero visualizar el catálogo general de productos agrícolas disponibles para conocer la oferta activa en la plataforma.
+
+**Priorización:** Must
+
+**Estimación:** 5
+
+### Escenario BDD
+
+**Given:** Que existen productos publicados con stock disponible mayor a cero en la base de datos.
+
+**When:** El usuario accede a la vista principal o catálogo de productos.
+
+**Then:** El sistema despliega el listado de productos mostrando nombre, categoría, precio, municipio, cantidad disponible y nombre del agricultor.
