@@ -1,8 +1,8 @@
 package com.agrovalle.service;
 
-import com.agrovalle.RegistroUsuarioSolicitud;
-import com.agrovalle.Usuario;
-import com.agrovalle.UsuarioRepository;
+import com.agrovalle.dto.request.RegistroUsuarioSolicitud;
+import com.agrovalle.entity.Usuario;
+import com.agrovalle.repository.UsuarioRepository;
 import com.agrovalle.exception.DocumentoDuplicadoException;
 import com.agrovalle.exception.CorreoDuplicadoException;
 

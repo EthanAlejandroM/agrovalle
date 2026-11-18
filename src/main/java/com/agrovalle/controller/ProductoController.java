@@ -13,10 +13,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.agrovalle.ActualizarLoteSolicitud;
-import com.agrovalle.ActualizarProductoSolicitud;
-import com.agrovalle.EstadoLote;
-import com.agrovalle.RegistroProductoSolicitud;
+import com.agrovalle.dto.request.ActualizarLoteSolicitud;
+import com.agrovalle.dto.request.ActualizarProductoSolicitud;
+import com.agrovalle.enums.EstadoLote;
+import com.agrovalle.dto.request.RegistroProductoSolicitud;
 import com.agrovalle.service.ProductoService;
 
 import jakarta.validation.Valid;

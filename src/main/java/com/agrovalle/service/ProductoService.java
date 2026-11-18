@@ -9,8 +9,8 @@ import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.agrovalle.ActualizarLoteSolicitud;
-import com.agrovalle.ActualizarProductoSolicitud;
+import com.agrovalle.dto.request.ActualizarLoteSolicitud;
+import com.agrovalle.dto.request.ActualizarProductoSolicitud;
 import com.agrovalle.exception.AgricultorNoAutorizadoException;
 import com.agrovalle.exception.CampoNoEditableException;
 import com.agrovalle.exception.DatosProductoInvalidosException;
@@ -21,19 +21,19 @@ import com.agrovalle.exception.AgricultorNoEncontradoException;
 import com.agrovalle.exception.CantidadLoteInvalidaException;
 import com.agrovalle.exception.CategoriaNoEncontradaException;
 import com.agrovalle.exception.FechaCosechaInvalidaException;
-import com.agrovalle.EstadoLote;
-import com.agrovalle.EstadoTrazabilidad;
-import com.agrovalle.EstadoTrazabilidadRepository;
-import com.agrovalle.LoteProduccion;
-import com.agrovalle.LoteProduccionRepository;
-import com.agrovalle.Producto;
-import com.agrovalle.ProductoRepository;
-import com.agrovalle.RegistroProductoSolicitud;
+import com.agrovalle.enums.EstadoLote;
+import com.agrovalle.entity.EstadoTrazabilidad;
+import com.agrovalle.repository.EstadoTrazabilidadRepository;
+import com.agrovalle.entity.LoteProduccion;
+import com.agrovalle.repository.LoteProduccionRepository;
+import com.agrovalle.entity.Producto;
+import com.agrovalle.repository.ProductoRepository;
+import com.agrovalle.dto.request.RegistroProductoSolicitud;
 import com.agrovalle.exception.RolAgricultorInvalidoException;
-import com.agrovalle.TipoUsuario;
-import com.agrovalle.Usuario;
-import com.agrovalle.UsuarioRepository;
-import com.agrovalle.CategoriaProductoRepository;
+import com.agrovalle.enums.TipoUsuario;
+import com.agrovalle.entity.Usuario;
+import com.agrovalle.repository.UsuarioRepository;
+import com.agrovalle.repository.CategoriaProductoRepository;
 
 @Service
 public class ProductoService {
