@@ -1,4 +1,8 @@
 package com.agrovalle.repository;
 
-public class StockProducto {
+import java.math.BigDecimal;
+
+public interface StockProducto {
+  Integer getIdProducto();
+  BigDecimal getTotal();
 }
