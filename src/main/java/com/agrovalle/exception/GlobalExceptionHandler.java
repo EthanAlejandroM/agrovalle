@@ -1,6 +1,5 @@
 package com.agrovalle.exception;
 
-import java.util.List;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.http.HttpStatus;
@@ -10,6 +9,8 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import java.util.List;
 
 /**
  * Centraliza el manejo de errores de la API y los devuelve como
@@ -209,4 +210,47 @@ public class GlobalExceptionHandler {
 
     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
   }
+  @ExceptionHandler(RolCompradorInvalidoException.class)
+  public ResponseEntity<ApiError> manejarRolCompradorInvalido(
+      RolCompradorInvalidoException ex) {
+    ApiError error = ApiError.of(
+        HttpStatus.FORBIDDEN, "ROL_COMPRADOR_INVALIDO", ex.getMessage());
+
+    return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
+  }
+
+  @ExceptionHandler(ItemCarritoNoEncontradoException.class)
+  public ResponseEntity<ApiError> manejarItemCarritoNoEncontrado(
+      ItemCarritoNoEncontradoException ex) {
+    ApiError error = ApiError.of(
+        HttpStatus.NOT_FOUND, "ITEM_CARRITO_NO_ENCONTRADO", ex.getMessage());
+
+    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+  }
+
+  @ExceptionHandler(ProductoSinStockException.class)
+  public ResponseEntity<ApiError> manejarProductoSinStock(ProductoSinStockException ex) {
+    ApiError error = ApiError.of(
+        HttpStatus.CONFLICT, "PRODUCTO_SIN_STOCK", ex.getMessage());
+
+    return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+  }
+
+  @ExceptionHandler(StockInsuficienteException.class)
+  public ResponseEntity<ApiError> manejarStockInsuficiente(StockInsuficienteException ex) {
+    ApiError error = ApiError.of(
+        HttpStatus.CONFLICT, "STOCK_INSUFICIENTE", ex.getMessage());
+
+    return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+  }
+
+  @ExceptionHandler(CantidadCarritoInvalidaException.class)
+  public ResponseEntity<ApiError> manejarCantidadCarritoInvalida(
+      CantidadCarritoInvalidaException ex) {
+    ApiError error = ApiError.of(
+        HttpStatus.BAD_REQUEST, "CANTIDAD_CARRITO_INVALIDA", ex.getMessage());
+
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+  }
+
 }
