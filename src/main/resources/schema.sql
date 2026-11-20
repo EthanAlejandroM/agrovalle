@@ -71,7 +71,7 @@ CREATE TABLE public.detalle_compra (
     "Id_producto" integer NOT NULL,
     cantidad numeric(10,2) NOT NULL,
     precio_unitario numeric(10,2),
-    total numeric NOT NULL
+    total numeric(10,2) NOT NULL
 );
 
 CREATE SEQUENCE public."detalle_compra_Id_detalle_seq"
