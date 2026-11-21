@@ -2,6 +2,7 @@ package com.agrovalle.exception;
 
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.OptimisticLockingFailureException;
+import org.springframework.dao.PessimisticLockingFailureException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -253,4 +254,76 @@ public class GlobalExceptionHandler {
     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
   }
 
+  @ExceptionHandler(CarritoVacioException.class)
+  public ResponseEntity<ApiError> manejarCarritoVacio(CarritoVacioException ex) {
+    ApiError error = ApiError.of(
+        HttpStatus.BAD_REQUEST, "CARRITO_VACIO", ex.getMessage());
+
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+  }
+
+  @ExceptionHandler(ProductoNoDisponibleException.class)
+  public ResponseEntity<ApiError> manejarProductoNoDisponible(ProductoNoDisponibleException ex) {
+    ApiError error = ApiError.of(
+        HttpStatus.CONFLICT, "PRODUCTO_NO_DISPONIBLE", ex.getMessage());
+
+    return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+  }
+
+  @ExceptionHandler(EstadoPedidoInvalidoException.class)
+  public ResponseEntity<ApiError> manejarEstadoPedidoInvalido(EstadoPedidoInvalidoException ex) {
+    ApiError error = ApiError.of(
+        HttpStatus.CONFLICT, "ESTADO_PEDIDO_INVALIDO", ex.getMessage());
+
+    return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+  }
+
+  @ExceptionHandler(PedidoNoEncontradoException.class)
+  public ResponseEntity<ApiError> manejarPedidoNoEncontrado(PedidoNoEncontradoException ex) {
+    ApiError error = ApiError.of(
+        HttpStatus.NOT_FOUND, "PEDIDO_NO_ENCONTRADO", ex.getMessage());
+
+    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+  }
+
+  @ExceptionHandler(MontoPagoInvalidoException.class)
+  public ResponseEntity<ApiError> manejarMontoPagoInvalido(MontoPagoInvalidoException ex) {
+    ApiError error = ApiError.of(
+        HttpStatus.BAD_REQUEST, "MONTO_PAGO_INVALIDO", ex.getMessage());
+
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+  }
+
+  @ExceptionHandler(TotalPedidoInvalidoException.class)
+  public ResponseEntity<ApiError> manejarTotalPedidoInvalido(TotalPedidoInvalidoException ex) {
+    ApiError error = ApiError.of(
+        HttpStatus.BAD_REQUEST, "TOTAL_PEDIDO_INVALIDO", ex.getMessage());
+
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+  }
+
+  @ExceptionHandler(CompradorNoEncontradoException.class)
+  public ResponseEntity<ApiError> manejarCompradorNoEncontrado(CompradorNoEncontradoException ex) {
+    ApiError error = ApiError.of(
+        HttpStatus.NOT_FOUND, "COMPRADOR_NO_ENCONTRADO", ex.getMessage());
+
+    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+  }
+
+  /**
+   * Bloqueo pesimista fallido (timeout, deadlock detectado por la base de datos):
+   * mismo tratamiento que el conflicto optimista. El cliente consulta de nuevo
+   * el stock y reintenta.
+   */
+  @ExceptionHandler(PessimisticLockingFailureException.class)
+  public ResponseEntity<ApiError> manejarBloqueoPesimista(
+      PessimisticLockingFailureException ex) {
+    ApiError error = ApiError.of(
+        HttpStatus.CONFLICT,
+        "CONFLICTO_CONCURRENCIA",
+        "El inventario está siendo modificado por otra operación. "
+            + "Consulte el stock actualizado e intente de nuevo.");
+
+    return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+  }
 }

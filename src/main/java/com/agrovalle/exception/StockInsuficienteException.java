@@ -12,6 +12,12 @@ public class StockInsuficienteException extends RuntimeException {
     this.disponible = disponible;
   }
 
+  // HU-19 (pedido): mensaje con el detalle de varios productos.
+  public StockInsuficienteException(String mensaje) {
+    super(mensaje);
+    this.disponible = null;
+  }
+
   public BigDecimal getDisponible() {
     return disponible;
   }
