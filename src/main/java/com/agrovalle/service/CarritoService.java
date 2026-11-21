@@ -7,16 +7,20 @@ import com.agrovalle.entity.Carrito;
 import com.agrovalle.entity.DetalleCarrito;
 import com.agrovalle.entity.Producto;
 import com.agrovalle.entity.Usuario;
+import com.agrovalle.enums.TipoUsuario;
 import com.agrovalle.enums.UnidadMedida;
 import com.agrovalle.exception.CantidadCarritoInvalidaException;
+import com.agrovalle.exception.CarritoConcurrenteException;
 import com.agrovalle.exception.ItemCarritoNoEncontradoException;
 import com.agrovalle.exception.ProductoNoEncontradoException;
 import com.agrovalle.exception.ProductoSinStockException;
+import com.agrovalle.exception.RolCompradorInvalidoException;
 import com.agrovalle.exception.StockInsuficienteException;
 import com.agrovalle.repository.CarritoRepository;
 import com.agrovalle.repository.LoteProduccionRepository;
 import com.agrovalle.repository.ProductoRepository;
 import com.agrovalle.repository.UsuarioRepository;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -60,6 +64,9 @@ public class CarritoService {
   @Transactional(readOnly = true)
   public CarritoRespuesta obtener(Integer idUsuario) {
 
+    // Solo el comprador usa el carrito.
+    validarComprador(idUsuario);
+
     return carritoRepo.findByCompradorId(idUsuario)
         .map(this::construirRespuesta)
         .orElse(new CarritoRespuesta(
@@ -80,6 +87,9 @@ public class CarritoService {
   public CarritoRespuesta agregar(
       Integer idUsuario,
       AgregarItemSolicitud req) {
+
+    // Solo el comprador usa el carrito.
+    validarComprador(idUsuario);
 
     // V-18.3: verificar que el producto exista.
     Producto producto = productoRepo.findById(req.idProducto())
@@ -127,7 +137,13 @@ public class CarritoService {
     // Actualizar la fecha de modificación.
     carrito.setFechaActualizacion(OffsetDateTime.now());
     // V-18.13: guardar y ejecutar el flush para detectar conflictos.
-    return construirRespuesta(carritoRepo.saveAndFlush(carrito));
+    // Si dos peticiones del mismo comprador crean el carrito o el mismo producto
+    // a la vez, el UNIQUE de PostgreSQL rechaza la segunda: se responde 409.
+    try {
+      return construirRespuesta(carritoRepo.saveAndFlush(carrito));
+    } catch (DataIntegrityViolationException ex) {
+      throw new CarritoConcurrenteException();
+    }
   }
 
   // MODIFICAR CANTIDAD DE UN PRODUCTO (T-18.6)
@@ -141,6 +157,9 @@ public class CarritoService {
       Integer idUsuario,
       Integer idProducto,
       BigDecimal cantidad) {
+
+    // Solo el comprador usa el carrito.
+    validarComprador(idUsuario);
 
     // V-18.8: verificar que el carrito y el producto existan.
     Carrito carrito = carritoRepo.findByCompradorId(idUsuario)
@@ -178,6 +197,9 @@ public class CarritoService {
   public CarritoRespuesta eliminarItem(
       Integer idUsuario,
       Integer idProducto) {
+
+    // Solo el comprador usa el carrito.
+    validarComprador(idUsuario);
 
     // V-18.8: verificar que el carrito exista.
     Carrito carrito = carritoRepo.findByCompradorId(idUsuario)
@@ -259,6 +281,20 @@ public class CarritoService {
 
 
   // MÉTODOS AUXILIARES
+
+  /**
+   * Verifica que el usuario autenticado sea COMPRADOR.
+   * Los agricultores solo pueden ver el catálogo, no comprar.
+   */
+  private void validarComprador(Integer idUsuario) {
+
+    Usuario usuario = usuarioRepo.findById(idUsuario)
+        .orElseThrow(RolCompradorInvalidoException::new);
+
+    if (usuario.getRol() != TipoUsuario.COMPRADOR) {
+      throw new RolCompradorInvalidoException();
+    }
+  }
 
   /**
    * Consulta el stock disponible de un producto.
