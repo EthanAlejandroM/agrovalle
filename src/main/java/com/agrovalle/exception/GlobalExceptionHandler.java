@@ -245,6 +245,14 @@ public class GlobalExceptionHandler {
     return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
   }
 
+  @ExceptionHandler(CarritoConcurrenteException.class)
+  public ResponseEntity<ApiError> manejarCarritoConcurrente(CarritoConcurrenteException ex) {
+    ApiError error = ApiError.of(
+        HttpStatus.CONFLICT, "CONFLICTO_CONCURRENCIA", ex.getMessage());
+
+    return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+  }
+  
   @ExceptionHandler(CantidadCarritoInvalidaException.class)
   public ResponseEntity<ApiError> manejarCantidadCarritoInvalida(
       CantidadCarritoInvalidaException ex) {
