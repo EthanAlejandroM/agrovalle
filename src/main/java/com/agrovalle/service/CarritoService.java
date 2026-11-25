@@ -11,6 +11,7 @@ import com.agrovalle.enums.TipoUsuario;
 import com.agrovalle.enums.UnidadMedida;
 import com.agrovalle.exception.CantidadCarritoInvalidaException;
 import com.agrovalle.exception.CarritoConcurrenteException;
+import com.agrovalle.exception.CompradorNoEncontradoException;
 import com.agrovalle.exception.ItemCarritoNoEncontradoException;
 import com.agrovalle.exception.ProductoNoEncontradoException;
 import com.agrovalle.exception.ProductoSinStockException;
@@ -62,12 +63,12 @@ public class CarritoService {
    * Si no existe, devuelve una lista vacía y subtotal 0.
    */
   @Transactional(readOnly = true)
-  public CarritoRespuesta obtener(Integer idUsuario) {
+  public CarritoRespuesta obtener(String correo) {
 
     // Solo el comprador usa el carrito.
-    validarComprador(idUsuario);
+    Usuario comprador = compradorAutenticado(correo);
 
-    return carritoRepo.findByCompradorId(idUsuario)
+    return carritoRepo.findByCompradorId(comprador.getId())
         .map(this::construirRespuesta)
         .orElse(new CarritoRespuesta(
             List.of(),
@@ -84,11 +85,11 @@ public class CarritoService {
    */
   @Transactional
   public CarritoRespuesta agregar(
-      Integer idUsuario,
+      String correo,
       AgregarItemSolicitud req) {
 
     // Solo el comprador usa el carrito.
-    validarComprador(idUsuario);
+    Usuario comprador = compradorAutenticado(correo);
 
     // V-18.3: verificar que el producto exista.
     Producto producto = productoRepo.findById(req.idProducto())
@@ -106,8 +107,8 @@ public class CarritoService {
       throw new ProductoSinStockException();
     }
     // Crear el carrito si todavía no existe.
-    Carrito carrito = carritoRepo.findByCompradorId(idUsuario)
-        .orElseGet(() -> nuevoCarrito(idUsuario));
+    Carrito carrito = carritoRepo.findByCompradorId(comprador.getId())
+        .orElseGet(() -> nuevoCarrito(comprador));
 
     // Buscar si el producto ya está en el carrito.
     Optional<DetalleCarrito> existente =
@@ -135,14 +136,11 @@ public class CarritoService {
     }
     // Actualizar la fecha de modificación.
     carrito.setFechaActualizacion(OffsetDateTime.now());
-    // V-18.13: guardar y ejecutar el flush para detectar conflictos.
+    // V-18.13: guardar() hace flush y convierte los choques de concurrencia
+    // (UNIQUE de PostgreSQL o @Version) en CarritoConcurrenteException -> 409.
     // Si dos peticiones del mismo comprador crean el carrito o el mismo producto
-    // a la vez, el UNIQUE de PostgreSQL rechaza la segunda: se responde 409.
-    try {
-      return construirRespuesta(guardar(carrito));
-    } catch (DataIntegrityViolationException ex) {
-      throw new CarritoConcurrenteException();
-    }
+    // a la vez, la segunda es rechazada.
+    return construirRespuesta(guardar(carrito));
   }
 
   // MODIFICAR CANTIDAD DE UN PRODUCTO (T-18.6)
@@ -152,15 +150,15 @@ public class CarritoService {
    */
   @Transactional
   public CarritoRespuesta modificarCantidad(
-      Integer idUsuario,
+      String correo,
       Integer idProducto,
       BigDecimal cantidad) {
 
     // Solo el comprador usa el carrito.
-    validarComprador(idUsuario);
+    Usuario comprador = compradorAutenticado(correo);
 
     // V-18.8: verificar que el carrito y el producto existan.
-    Carrito carrito = carritoRepo.findByCompradorId(idUsuario)
+    Carrito carrito = carritoRepo.findByCompradorId(comprador.getId())
         .orElseThrow(ItemCarritoNoEncontradoException::new);
     DetalleCarrito item = buscarItem(carrito, idProducto)
         .orElseThrow(ItemCarritoNoEncontradoException::new);
@@ -192,14 +190,14 @@ public class CarritoService {
    */
   @Transactional
   public CarritoRespuesta eliminarItem(
-      Integer idUsuario,
+      String correo,
       Integer idProducto) {
 
     // Solo el comprador usa el carrito.
-    validarComprador(idUsuario);
+    Usuario comprador = compradorAutenticado(correo);
 
     // V-18.8: verificar que el carrito exista.
-    Carrito carrito = carritoRepo.findByCompradorId(idUsuario)
+    Carrito carrito = carritoRepo.findByCompradorId(comprador.getId())
         .orElseThrow(ItemCarritoNoEncontradoException::new);
 
     // Buscar el producto dentro del carrito.
@@ -278,17 +276,20 @@ public class CarritoService {
 
   // MÉTODOS AUXILIARES
   /**
-   * Verifica que el usuario autenticado sea COMPRADOR.
-   * Los agricultores solo pueden ver el catálogo, no comprar.
+   * Busca al usuario autenticado (por el correo del token) y verifica que sea
+   * COMPRADOR. Los agricultores solo pueden ver el catálogo, no comprar.
+   * Una sola consulta; devuelve el usuario para reutilizarlo.
    */
-  private void validarComprador(Integer idUsuario) {
+  private Usuario compradorAutenticado(String correo) {
 
-    Usuario usuario = usuarioRepo.findById(idUsuario)
-        .orElseThrow(RolCompradorInvalidoException::new);
+    Usuario usuario = usuarioRepo.findByCorreo(correo)
+        .orElseThrow(() -> new CompradorNoEncontradoException(
+            "El usuario autenticado no existe."));
 
     if (usuario.getRol() != TipoUsuario.COMPRADOR) {
       throw new RolCompradorInvalidoException();
     }
+    return usuario;
   }
   /**
    * Consulta el stock disponible de un producto.
@@ -312,14 +313,9 @@ public class CarritoService {
         .findFirst();
   }
   /**
-   * Crea un carrito nuevo para el usuario.
+   * Crea un carrito nuevo para el comprador.
    */
-  private Carrito nuevoCarrito(Integer idUsuario) {
-
-    Usuario comprador = usuarioRepo.findById(idUsuario)
-        .orElseThrow(() -> new IllegalStateException(
-            "Usuario no encontrado"
-        ));
+  private Carrito nuevoCarrito(Usuario comprador) {
 
     Carrito carrito = new Carrito();
 

@@ -3,7 +3,6 @@ package com.agrovalle.controller;
 import com.agrovalle.dto.request.AgregarItemSolicitud;
 import com.agrovalle.dto.request.ModificarCantidadSolicitud;
 import com.agrovalle.dto.response.CarritoRespuesta;
-import com.agrovalle.repository.UsuarioRepository;
 import com.agrovalle.service.CarritoService;
 import jakarta.validation.Valid;
 import org.springframework.http.CacheControl;
@@ -23,25 +22,21 @@ import org.springframework.web.bind.annotation.RestController;
 public class CarritoController {
 
   private final CarritoService carritoService;
-  private final UsuarioRepository usuarioRepo;
 
-
-
-  public CarritoController(CarritoService carritoService, UsuarioRepository usuarioRepo) {
+  public CarritoController(CarritoService carritoService) {
     this.carritoService = carritoService;
-    this.usuarioRepo = usuarioRepo;
   }
 
   @GetMapping
   public ResponseEntity<CarritoRespuesta> obtener(Authentication auth) {
-    return respuesta(carritoService.obtener(idUsuario(auth)));
+    return respuesta(carritoService.obtener(auth.getName()));
   }
 
   @PostMapping("/items")
   public ResponseEntity<CarritoRespuesta> agregar(
       Authentication auth,
       @Valid @RequestBody AgregarItemSolicitud req) {
-    return respuesta(carritoService.agregar(idUsuario(auth), req));
+    return respuesta(carritoService.agregar(auth.getName(), req));
   }
 
   @PutMapping("/items/{idProducto}")
@@ -50,22 +45,17 @@ public class CarritoController {
       @PathVariable Integer idProducto,
       @Valid @RequestBody ModificarCantidadSolicitud req) {
     return respuesta(
-        carritoService.modificarCantidad(idUsuario(auth), idProducto, req.cantidad()));
+        carritoService.modificarCantidad(auth.getName(), idProducto, req.cantidad()));
   }
 
   @DeleteMapping("/items/{idProducto}")
   public ResponseEntity<CarritoRespuesta> eliminar(
       Authentication auth,
       @PathVariable Integer idProducto) {
-    return respuesta(carritoService.eliminarItem(idUsuario(auth), idProducto));
+    return respuesta(carritoService.eliminarItem(auth.getName(), idProducto));
   }
 
-   /** El id sale del token JWT, nunca del cuerpo ni de la URL. */
-  private Integer idUsuario(Authentication auth) {
-    return usuarioRepo.findByCorreo(auth.getName())
-        .orElseThrow(() -> new IllegalStateException("Usuario no encontrado"))
-        .getId();
-  }
+  // auth.getName() es el correo del token JWT validado: nunca viene del cuerpo ni de la URL.
 
   /** Cache-Control: no-store para no mostrar valores viejos. */
   private ResponseEntity<CarritoRespuesta> respuesta(CarritoRespuesta cuerpo) {
