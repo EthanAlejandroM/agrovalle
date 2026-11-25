@@ -26,15 +26,24 @@ public class OrdenCompra {
   @JoinColumn(name = "\"Id_usuario_comprador\"", nullable = false)
   private Usuario comprador;
 
-  // Suma de los subtotales de los pedidos. Solo productos: el envío no entra.
-  @Column(nullable = false, precision = 10, scale = 2)
-  private BigDecimal total;
-
   // La columna es "time with time zone": solo guarda la hora. El día del pedido
   // se consulta en pedido_agricultor.fecha_creacion.
   @Column(name = "fecha_orden", nullable = false, columnDefinition = "time with time zone")
   private OffsetTime fechaOrden;
 
+  // Suma de los totales de los detalles de detalle_compra
+  @Column(nullable = false, precision = 10, scale = 2)
+  private BigDecimal subtotal;
+
+  //suma de los IVAs de los detalles de detalle_compra
+  @Column (nullable = false, precision = 10, scale = 2)
+  private BigDecimal iva;
+
+  // total final de la compra total= subtotal + iva
+  @Column(nullable = false, precision = 10, scale = 2)
+  private BigDecimal total;
+
+  // constructor vacío requerido por JPA
   public OrdenCompra() {
   }
 
@@ -55,19 +64,35 @@ public class OrdenCompra {
     this.comprador = comprador;
   }
 
-  public BigDecimal getTotal() {
-    return total;
-  }
-
-  public void setTotal(BigDecimal total) {
-    this.total = total;
-  }
-
   public OffsetTime getFechaOrden() {
     return fechaOrden;
   }
 
   public void setFechaOrden(OffsetTime fechaOrden) {
     this.fechaOrden = fechaOrden;
+  }
+
+  public BigDecimal getSubtotal() {
+    return subtotal;
+  }
+
+  public void setSubtotal(BigDecimal subtotal) {
+    this.subtotal = subtotal;
+  }
+
+  public BigDecimal getIva() {
+    return iva;
+  }
+
+  public void setIva(BigDecimal iva) {
+    this.iva = iva;
+  }
+
+  public BigDecimal getTotal() {
+    return total;
+  }
+
+  public void setTotal(BigDecimal total) {
+    this.total = total;
   }
 }
