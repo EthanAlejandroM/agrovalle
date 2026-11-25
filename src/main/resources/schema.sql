@@ -71,7 +71,8 @@ CREATE TABLE public.detalle_compra (
     "Id_producto" integer NOT NULL,
     cantidad numeric(10,2) NOT NULL,
     precio_unitario numeric(10,2),
-    total numeric(10,2) NOT NULL
+    total numeric(10,2) NOT NULL,
+    iva numeric(10,2) DEFAULT 0 NOT NULL
 );
 
 CREATE SEQUENCE public."detalle_compra_Id_detalle_seq"
@@ -184,7 +185,9 @@ CREATE TABLE public.orden_compra (
     "Id_orden" integer NOT NULL,
     "Id_usuario_comprador" integer NOT NULL,
     total numeric(10,2) NOT NULL,
-    fecha_orden time with time zone NOT NULL
+    fecha_orden time with time zone NOT NULL,
+    subtotal numeric(10,2) DEFAULT 0 NOT NULL,
+    iva numeric(10,2) DEFAULT 0 NOT NULL
 );
 
 CREATE SEQUENCE public."orden_compra_Id_orden_seq"
@@ -225,7 +228,7 @@ CREATE TABLE public.pedido_agricultor (
     subtotal_pedido numeric(10,2) NOT NULL
 );
 
-CREATE SEQUENCE public.pedido_agricultor_id_pedido_agricultor_seq
+CREATE SEQUENCE public.pedido_agricultor_id_pedido_agricultor_seq"
     AS integer
     START WITH 1
     INCREMENT BY 1
