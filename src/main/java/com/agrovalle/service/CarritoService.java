@@ -21,6 +21,7 @@ import com.agrovalle.repository.LoteProduccionRepository;
 import com.agrovalle.repository.ProductoRepository;
 import com.agrovalle.repository.UsuarioRepository;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -56,7 +57,6 @@ public class CarritoService {
 
 
   // Consultar Carrito - GET (V-18.11)
-
   /**
    * Devuelve el carrito del usuario.
    * Si no existe, devuelve una lista vacía y subtotal 0.
@@ -76,7 +76,6 @@ public class CarritoService {
   }
 
   // AGREGAR EL PRODUCTO AL CARRITO  (T-18.5)
-
   /**
    * Agrega un producto al carrito del usuario autenticado.
    * Crea el carrito si no existe.
@@ -140,14 +139,13 @@ public class CarritoService {
     // Si dos peticiones del mismo comprador crean el carrito o el mismo producto
     // a la vez, el UNIQUE de PostgreSQL rechaza la segunda: se responde 409.
     try {
-      return construirRespuesta(carritoRepo.saveAndFlush(carrito));
+      return construirRespuesta(guardar(carrito));
     } catch (DataIntegrityViolationException ex) {
       throw new CarritoConcurrenteException();
     }
   }
 
   // MODIFICAR CANTIDAD DE UN PRODUCTO (T-18.6)
-
   /**
    * Cambia la cantidad de un producto que ya está
    * en el carrito del usuario.
@@ -185,11 +183,10 @@ public class CarritoService {
     // Actualizar la cantidad.
     item.setCantidad(cantidad);
     carrito.setFechaActualizacion(OffsetDateTime.now());
-    return construirRespuesta(carritoRepo.saveAndFlush(carrito));
+    return construirRespuesta(guardar(carrito));
   }
 
   // ELIMINAR PRODUCTO DEL CARRITO (T-18.6)
-
   /**
    * Elimina un producto del carrito del usuario.
    */
@@ -213,11 +210,10 @@ public class CarritoService {
     // orphanRemoval se encarga de eliminarlo de la BD.
     carrito.getItems().remove(item);
     carrito.setFechaActualizacion(OffsetDateTime.now());
-    return construirRespuesta(carritoRepo.saveAndFlush(carrito));
+    return construirRespuesta(guardar(carrito));
   }
 
   // CONSTRUIR RESPUESTA DEL CARRITO (T-18.7)
-
   /**
    * Construye la respuesta del carrito con sus subtotales.
    * Utiliza el precio vigente del producto.
@@ -281,7 +277,6 @@ public class CarritoService {
 
 
   // MÉTODOS AUXILIARES
-
   /**
    * Verifica que el usuario autenticado sea COMPRADOR.
    * Los agricultores solo pueden ver el catálogo, no comprar.
@@ -295,7 +290,6 @@ public class CarritoService {
       throw new RolCompradorInvalidoException();
     }
   }
-
   /**
    * Consulta el stock disponible de un producto.
    */
@@ -304,7 +298,6 @@ public class CarritoService {
     return loteRepo.mapaStock(List.of(idProducto))
         .getOrDefault(idProducto, BigDecimal.ZERO);
   }
-
   /**
    * Busca un producto dentro del carrito.
    */
@@ -318,7 +311,6 @@ public class CarritoService {
             .equals(idProducto))
         .findFirst();
   }
-
   /**
    * Crea un carrito nuevo para el usuario.
    */
@@ -337,7 +329,6 @@ public class CarritoService {
 
     return carrito;
   }
-
   /**
    * Valida que los productos con unidad UNIDAD o BULTO
    * solamente acepten cantidades enteras.
@@ -355,6 +346,18 @@ public class CarritoService {
       throw new CantidadCarritoInvalidaException(
           "Este producto solo admite cantidades enteras"
       );
+    }
+  }
+  /**
+   * Guarda el carrito y hace flush para detectar aquí los choques de
+   * concurrencia: UNIQUE de PostgreSQL o @Version. Responde 409.
+   */
+  private Carrito guardar(Carrito carrito) {
+    try {
+      return carritoRepo.saveAndFlush(carrito);
+    } catch (DataIntegrityViolationException
+             | OptimisticLockingFailureException ex) {
+      throw new CarritoConcurrenteException();
     }
   }
 }
