@@ -10,6 +10,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.util.List;
 
@@ -333,5 +334,17 @@ public class GlobalExceptionHandler {
             + "Consulte el stock actualizado e intente de nuevo.");
 
     return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+  }
+
+  /** Parámetro de la URL con tipo incorrecto (por ejemplo, un id no numérico). */
+  @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+  public ResponseEntity<ApiError> manejarParametroInvalido(
+      MethodArgumentTypeMismatchException ex) {
+    ApiError error = ApiError.of(
+        HttpStatus.BAD_REQUEST,
+        "PARAMETRO_INVALIDO",
+        "El parámetro '" + ex.getName() + "' tiene un valor inválido.");
+
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
   }
 }

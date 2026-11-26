@@ -40,6 +40,10 @@ public class DetalleCompra {
   @Column(nullable = false, precision = 10, scale = 2)
   private BigDecimal total;
 
+  // IVA calculado sobre el total del detalle, según la categoría del producto.
+  @Column(nullable = false, precision = 10, scale = 2)
+  private BigDecimal iva;
+
   public DetalleCompra() {
   }
 
@@ -90,6 +94,14 @@ public class DetalleCompra {
 
   public void setTotal(BigDecimal total) {
     this.total = total;
+  }
+
+  public BigDecimal getIva() {
+    return iva;
+  }
+
+  public void setIva(BigDecimal iva) {
+    this.iva = iva;
   }
 }
 
