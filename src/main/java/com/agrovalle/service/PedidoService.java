@@ -13,8 +13,10 @@ import com.agrovalle.entity.PedidoAgricultor;
 import com.agrovalle.entity.Producto;
 import com.agrovalle.entity.Usuario;
 import com.agrovalle.enums.EstadoPedido;
+import com.agrovalle.enums.TipoUsuario;
 import com.agrovalle.exception.CarritoVacioException;
 import com.agrovalle.exception.CompradorNoEncontradoException;
+import com.agrovalle.exception.RolCompradorInvalidoException;
 import com.agrovalle.exception.TotalPedidoInvalidoException;
 import com.agrovalle.repository.CarritoRepository;
 import com.agrovalle.repository.DetalleCompraRepository;
@@ -43,8 +45,11 @@ import org.springframework.transaction.annotation.Transactional;
  * crean la orden, un pedido PENDIENTE por agricultor, sus detalles, el envío
  * provisional y la reserva por lote, y se vacía el carrito.
  *
- * El rol COMPRADOR se valida en el controlador (T-19.13). Un agricultor no tiene
- * carrito, así que aquí obtendría CARRITO_VACIO.
+ * El rol COMPRADOR se valida aquí, en el servicio, para que la regla no dependa
+ * de quién llame (controlador u otro servicio): un usuario que no sea COMPRADOR
+ * recibe RolCompradorInvalidoException (403 ROL_COMPRADOR_INVALIDO) antes de
+ * bloquear el carrito o tocar los lotes. El rol se lee de la base de datos, no
+ * del token.
  */
 @Service
 public class PedidoService {
@@ -81,8 +86,8 @@ public class PedidoService {
     this.asignacionLotesService = asignacionLotesService;
   }
 
-  /** Línea ya valorada del carrito: precio vigente y total de la línea. */
-  private record Linea(DetalleCarrito item, BigDecimal precio, BigDecimal total) {
+  /** Línea ya valorada del carrito: precio vigente, total (sin IVA) e IVA de la línea. */
+  private record Linea(DetalleCarrito item, BigDecimal precio, BigDecimal total, BigDecimal iva) {
   }
 
   /**
@@ -94,6 +99,11 @@ public class PedidoService {
     Usuario comprador = usuarioRepository.findByCorreo(correoComprador)
         .orElseThrow(() -> new CompradorNoEncontradoException(
             "El usuario autenticado no existe."));
+
+    // Solo el comprador realiza pedidos (se valida antes de bloquear nada).
+    if (comprador.getRol() != TipoUsuario.COMPRADOR) {
+      throw new RolCompradorInvalidoException();
+    }
 
     // El carrito se bloquea: un segundo "Realizar pedido" simultáneo espera aquí
     // y, al continuar, lo encuentra vacío.
@@ -113,7 +123,8 @@ public class PedidoService {
     List<Linea> lineas = new ArrayList<>();
     Map<Integer, Usuario> agricultores = new LinkedHashMap<>();
     Map<Integer, BigDecimal> subtotalPorAgricultor = new LinkedHashMap<>();
-    BigDecimal totalOrden = BigDecimal.ZERO;
+    BigDecimal subtotalOrden = BigDecimal.ZERO;
+    BigDecimal ivaOrden = BigDecimal.ZERO;
 
     for (DetalleCarrito item : items) {
       Producto producto = item.getProducto();
@@ -121,13 +132,21 @@ public class PedidoService {
       BigDecimal totalLinea = precio.multiply(item.getCantidad())
           .setScale(2, RoundingMode.HALF_UP);
 
-      lineas.add(new Linea(item, precio, totalLinea));
-      totalOrden = totalOrden.add(totalLinea);
+      // IVA 5 % solo si la categoría del producto es la 7; en las demás es 0.
+      BigDecimal ivaLinea = CalculoIva.ivaDe(producto, totalLinea);
+
+      lineas.add(new Linea(item, precio, totalLinea, ivaLinea));
+      subtotalOrden = subtotalOrden.add(totalLinea);
+      ivaOrden = ivaOrden.add(ivaLinea);
 
       Usuario agricultor = producto.getAgricultor();
       agricultores.putIfAbsent(agricultor.getId(), agricultor);
       subtotalPorAgricultor.merge(agricultor.getId(), totalLinea, BigDecimal::add);
     }
+
+    // subtotal = suma de los totales; iva = suma de los IVA de cada línea;
+    // total = valor final que debe pagar el comprador (subtotal + iva).
+    BigDecimal totalOrden = subtotalOrden.add(ivaOrden);
 
     if (totalOrden.compareTo(TOTAL_MAXIMO) > 0) {
       throw new TotalPedidoInvalidoException(
@@ -140,6 +159,8 @@ public class PedidoService {
 
     OrdenCompra orden = new OrdenCompra();
     orden.setComprador(comprador);
+    orden.setSubtotal(subtotalOrden);
+    orden.setIva(ivaOrden);
     orden.setTotal(totalOrden);
     orden.setFechaOrden(ahoraHora);
     ordenCompraRepository.save(orden);
@@ -178,6 +199,8 @@ public class PedidoService {
       detalle.setCantidad(linea.item().getCantidad());
       detalle.setPrecioUnitario(linea.precio());
       detalle.setTotal(linea.total());
+      // Se asigna siempre (incluso 0): Hibernate no aplica el DEFAULT 0 de la columna.
+      detalle.setIva(linea.iva());
       detalleCompraRepository.save(detalle);
 
       asignacionLotesService.reservar(
@@ -204,6 +227,7 @@ public class PedidoService {
           pedido.getSubtotalPedido()));
     }
 
-    return new PedidoRespuesta(orden.getId(), orden.getTotal(), resumen);
+    return new PedidoRespuesta(
+        orden.getId(), orden.getSubtotal(), orden.getIva(), orden.getTotal(), resumen);
   }
 }
