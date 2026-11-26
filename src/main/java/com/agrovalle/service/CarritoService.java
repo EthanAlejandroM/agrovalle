@@ -70,10 +70,7 @@ public class CarritoService {
 
     return carritoRepo.findByCompradorId(comprador.getId())
         .map(this::construirRespuesta)
-        .orElse(new CarritoRespuesta(
-            List.of(),
-            BigDecimal.ZERO.setScale(2)
-        ));
+        .orElseGet(this::respuestaVacia);
   }
 
   // AGREGAR EL PRODUCTO AL CARRITO  (T-18.5)
@@ -211,11 +208,45 @@ public class CarritoService {
     return construirRespuesta(guardar(carrito));
   }
 
+  // VACIAR EL CARRITO ("Limpiar carrito")
+  /**
+   * Elimina todos los productos del carrito del usuario autenticado.
+   * Es idempotente: si el carrito no existe o ya está vacío, devuelve el
+   * carrito vacío sin error.
+   */
+  @Transactional
+  public CarritoRespuesta vaciar(String correo) {
+
+    // Solo el comprador usa el carrito.
+    Usuario comprador = compradorAutenticado(correo);
+
+    Optional<Carrito> existente = carritoRepo.findByCompradorId(comprador.getId());
+    if (existente.isEmpty() || existente.get().getItems().isEmpty()) {
+      return respuestaVacia();
+    }
+
+    Carrito carrito = existente.get();
+    // orphanRemoval se encarga de eliminar los ítems de la BD.
+    carrito.getItems().clear();
+    carrito.setFechaActualizacion(OffsetDateTime.now());
+    return construirRespuesta(guardar(carrito));
+  }
+
+  /** Carrito sin productos: lista vacía y subtotal, IVA y total en 0.00. */
+  private CarritoRespuesta respuestaVacia() {
+    return new CarritoRespuesta(
+        List.of(),
+        BigDecimal.ZERO.setScale(2),
+        BigDecimal.ZERO.setScale(2),
+        BigDecimal.ZERO.setScale(2));
+  }
+
   // CONSTRUIR RESPUESTA DEL CARRITO (T-18.7)
   /**
-   * Construye la respuesta del carrito con sus subtotales.
+   * Construye la respuesta del carrito con sus subtotales, IVA y total.
    * Utiliza el precio vigente del producto.
    * El precio nunca es recibido desde el cliente.
+   * El IVA se calcula con la misma regla que usa el pedido (CalculoIva).
    */
   private CarritoRespuesta construirRespuesta(Carrito carrito) {
 
@@ -227,7 +258,8 @@ public class CarritoService {
     // Consultar el stock de todos los productos.
     Map<Integer, BigDecimal> stock = loteRepo.mapaStock(ids);
     List<CarritoRespuesta.ItemCarrito> items = new ArrayList<>();
-    BigDecimal total = BigDecimal.ZERO;
+    BigDecimal subtotalCarrito = BigDecimal.ZERO;
+    BigDecimal ivaCarrito = BigDecimal.ZERO;
 
     // Recorrer los productos del carrito.
     for (DetalleCarrito detalle : carrito.getItems()) {
@@ -237,6 +269,9 @@ public class CarritoService {
       BigDecimal subtotal = producto.getPrecio()
           .multiply(detalle.getCantidad())
           .setScale(2, RoundingMode.HALF_UP);
+
+      // IVA de la línea: 5 % solo para la categoría 7, 0 en las demás.
+      BigDecimal iva = CalculoIva.ivaDe(producto, subtotal);
 
       // Obtener stock disponible.
       // Si no existe información de stock, se devuelve cero.
@@ -254,22 +289,30 @@ public class CarritoService {
       items.add(new CarritoRespuesta.ItemCarrito(
           producto.getIdProducto(),
           producto.getNombre(),
+          producto.getImagen(),
           producto.getUnidadMedida().name(),
           producto.getPrecio(),
           detalle.getCantidad(),
           subtotal,
+          iva,
           disponible,
           suficiente
       ));
 
-      // Acumular el total del carrito.
-      total = total.add(subtotal);
+      // Acumular subtotal e IVA del carrito.
+      subtotalCarrito = subtotalCarrito.add(subtotal);
+      ivaCarrito = ivaCarrito.add(iva);
     }
 
-    // Devolver la respuesta con el total calculado.
+    // total = subtotal + IVA (valor final que debe pagar el comprador).
+    subtotalCarrito = subtotalCarrito.setScale(2, RoundingMode.HALF_UP);
+    ivaCarrito = ivaCarrito.setScale(2, RoundingMode.HALF_UP);
+
     return new CarritoRespuesta(
         items,
-        total.setScale(2, RoundingMode.HALF_UP)
+        subtotalCarrito,
+        ivaCarrito,
+        subtotalCarrito.add(ivaCarrito)
     );
   }
 
