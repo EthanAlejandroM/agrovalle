@@ -32,6 +32,12 @@ public class CarritoController {
     return respuesta(carritoService.obtener(auth.getName()));
   }
 
+  /** "Limpiar carrito": elimina todos los productos. */
+  @DeleteMapping
+  public ResponseEntity<CarritoRespuesta> vaciar(Authentication auth) {
+    return respuesta(carritoService.vaciar(auth.getName()));
+  }
+
   @PostMapping("/items")
   public ResponseEntity<CarritoRespuesta> agregar(
       Authentication auth,
