@@ -25,8 +25,11 @@ import com.agrovalle.entity.OrdenCompra;
 import com.agrovalle.entity.Producto;
 import com.agrovalle.entity.Usuario;
 import com.agrovalle.enums.EstadoLote;
+import com.agrovalle.enums.TipoUsuario;
 import com.agrovalle.exception.CarritoVacioException;
+import com.agrovalle.exception.CompradorNoEncontradoException;
 import com.agrovalle.exception.ProductoNoDisponibleException;
+import com.agrovalle.exception.RolCompradorInvalidoException;
 import com.agrovalle.exception.StockInsuficienteException;
 import com.agrovalle.exception.TotalPedidoInvalidoException;
 import com.agrovalle.repository.CarritoRepository;
@@ -104,6 +107,8 @@ class PedidoServiceTest {
     Usuario usuario = new Usuario();
     usuario.setId(id);
     usuario.setNombre(nombre);
+    // El comprador de las pruebas es ID_COMPRADOR; los demás son agricultores.
+    usuario.setRol(id == ID_COMPRADOR ? TipoUsuario.COMPRADOR : TipoUsuario.AGRICULTOR);
     return usuario;
   }
 
@@ -456,5 +461,56 @@ class PedidoServiceTest {
         () -> pedidoService.realizar(CORREO, solicitud()));
 
     verify(ordenCompraRepository, never()).save(any(OrdenCompra.class));
+  }
+
+  // ---------- Rol del usuario autenticado ----------
+
+  @Test
+  @DisplayName("Un AGRICULTOR no puede realizar pedidos: lanza RolCompradorInvalidoException")
+  void rechazaUsuarioAgricultor() {
+    Usuario agricultor = usuario(2, "Carlos");
+    when(usuarioRepository.findByCorreo(CORREO)).thenReturn(Optional.of(agricultor));
+
+    RolCompradorInvalidoException ex = assertThrows(RolCompradorInvalidoException.class,
+        () -> pedidoService.realizar(CORREO, solicitud()));
+
+    assertEquals("Solo el comprador puede realizar esta operación", ex.getMessage());
+    // No se bloquea el carrito ni se toca nada
+    verify(carritoRepository, never()).bloquearPorComprador(any());
+    verify(loteProduccionRepository, never()).bloquearDisponiblesPorProductos(any());
+    verify(ordenCompraRepository, never()).save(any(OrdenCompra.class));
+    verify(detalleCompraRepository, never()).save(any(DetalleCompra.class));
+    verify(carritoRepository, never()).save(any(Carrito.class));
+  }
+
+  @Test
+  @DisplayName("Usuario del token inexistente: lanza CompradorNoEncontradoException")
+  void rechazaUsuarioInexistente() {
+    when(usuarioRepository.findByCorreo(CORREO)).thenReturn(Optional.empty());
+
+    assertThrows(CompradorNoEncontradoException.class,
+        () -> pedidoService.realizar(CORREO, solicitud()));
+
+    verify(carritoRepository, never()).bloquearPorComprador(any());
+    verify(ordenCompraRepository, never()).save(any(OrdenCompra.class));
+  }
+
+  @Test
+  @DisplayName("Un COMPRADOR sí puede realizar pedidos")
+  void permiteUsuarioComprador() {
+    Usuario comprador = usuario(ID_COMPRADOR, "Ana");
+    Producto tomate = producto(10, "Tomate chonto", "1000.00", usuario(2, "Carlos"));
+
+    Carrito carrito = carritoVacio(comprador);
+    agregarItem(carrito, tomate, "1.00");
+
+    autenticarConCarrito(comprador, carrito);
+    when(loteProduccionRepository.bloquearDisponiblesPorProductos(any()))
+        .thenReturn(List.of(lote(1, tomate, "2026-11-01", "10.00")));
+
+    PedidoRespuesta respuesta = pedidoService.realizar(CORREO, solicitud());
+
+    assertDecimal("1000.00", respuesta.total());
+    verify(ordenCompraRepository).save(any(OrdenCompra.class));
   }
 }

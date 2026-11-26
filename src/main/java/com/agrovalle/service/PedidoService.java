@@ -13,8 +13,10 @@ import com.agrovalle.entity.PedidoAgricultor;
 import com.agrovalle.entity.Producto;
 import com.agrovalle.entity.Usuario;
 import com.agrovalle.enums.EstadoPedido;
+import com.agrovalle.enums.TipoUsuario;
 import com.agrovalle.exception.CarritoVacioException;
 import com.agrovalle.exception.CompradorNoEncontradoException;
+import com.agrovalle.exception.RolCompradorInvalidoException;
 import com.agrovalle.exception.TotalPedidoInvalidoException;
 import com.agrovalle.repository.CarritoRepository;
 import com.agrovalle.repository.DetalleCompraRepository;
@@ -43,8 +45,11 @@ import org.springframework.transaction.annotation.Transactional;
  * crean la orden, un pedido PENDIENTE por agricultor, sus detalles, el envío
  * provisional y la reserva por lote, y se vacía el carrito.
  *
- * El rol COMPRADOR se valida en el controlador (T-19.13). Un agricultor no tiene
- * carrito, así que aquí obtendría CARRITO_VACIO.
+ * El rol COMPRADOR se valida aquí, en el servicio, para que la regla no dependa
+ * de quién llame (controlador u otro servicio): un usuario que no sea COMPRADOR
+ * recibe RolCompradorInvalidoException (403 ROL_COMPRADOR_INVALIDO) antes de
+ * bloquear el carrito o tocar los lotes. El rol se lee de la base de datos, no
+ * del token.
  */
 @Service
 public class PedidoService {
@@ -94,6 +99,11 @@ public class PedidoService {
     Usuario comprador = usuarioRepository.findByCorreo(correoComprador)
         .orElseThrow(() -> new CompradorNoEncontradoException(
             "El usuario autenticado no existe."));
+
+    // Solo el comprador realiza pedidos (se valida antes de bloquear nada).
+    if (comprador.getRol() != TipoUsuario.COMPRADOR) {
+      throw new RolCompradorInvalidoException();
+    }
 
     // El carrito se bloquea: un segundo "Realizar pedido" simultáneo espera aquí
     // y, al continuar, lo encuentra vacío.
