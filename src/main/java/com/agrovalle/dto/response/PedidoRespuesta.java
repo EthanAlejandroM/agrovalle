@@ -6,6 +6,8 @@ import java.util.List;
 /** Resultado de realizar un pedido: la orden y un pedido por cada agricultor. */
 public record PedidoRespuesta(
     Integer idOrden,
+    BigDecimal subtotal,
+    BigDecimal iva,
     BigDecimal total,
     List<PedidoAgricultorResumen> pedidos) {
 
