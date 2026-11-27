@@ -22,3 +22,28 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Optional stylelint cache
+.stylelintcache
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz   
+
+# dotenv environment variables file
+.env
+
+# Next.js build output
+.next
+
+# Uncomment if using Next.js 13 with the new app directory
+# .next/
+
