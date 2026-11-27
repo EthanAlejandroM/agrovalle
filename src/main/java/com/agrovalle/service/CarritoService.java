@@ -7,16 +7,22 @@ import com.agrovalle.entity.Carrito;
 import com.agrovalle.entity.DetalleCarrito;
 import com.agrovalle.entity.Producto;
 import com.agrovalle.entity.Usuario;
+import com.agrovalle.enums.TipoUsuario;
 import com.agrovalle.enums.UnidadMedida;
 import com.agrovalle.exception.CantidadCarritoInvalidaException;
+import com.agrovalle.exception.CarritoConcurrenteException;
+import com.agrovalle.exception.CompradorNoEncontradoException;
 import com.agrovalle.exception.ItemCarritoNoEncontradoException;
 import com.agrovalle.exception.ProductoNoEncontradoException;
 import com.agrovalle.exception.ProductoSinStockException;
+import com.agrovalle.exception.RolCompradorInvalidoException;
 import com.agrovalle.exception.StockInsuficienteException;
 import com.agrovalle.repository.CarritoRepository;
 import com.agrovalle.repository.LoteProduccionRepository;
 import com.agrovalle.repository.ProductoRepository;
 import com.agrovalle.repository.UsuarioRepository;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -52,24 +58,22 @@ public class CarritoService {
 
 
   // Consultar Carrito - GET (V-18.11)
-
   /**
    * Devuelve el carrito del usuario.
    * Si no existe, devuelve una lista vacía y subtotal 0.
    */
   @Transactional(readOnly = true)
-  public CarritoRespuesta obtener(Integer idUsuario) {
+  public CarritoRespuesta obtener(String correo) {
 
-    return carritoRepo.findByCompradorId(idUsuario)
+    // Solo el comprador usa el carrito.
+    Usuario comprador = compradorAutenticado(correo);
+
+    return carritoRepo.findByCompradorId(comprador.getId())
         .map(this::construirRespuesta)
-        .orElse(new CarritoRespuesta(
-            List.of(),
-            BigDecimal.ZERO.setScale(2)
-        ));
+        .orElseGet(this::respuestaVacia);
   }
 
   // AGREGAR EL PRODUCTO AL CARRITO  (T-18.5)
-
   /**
    * Agrega un producto al carrito del usuario autenticado.
    * Crea el carrito si no existe.
@@ -78,8 +82,11 @@ public class CarritoService {
    */
   @Transactional
   public CarritoRespuesta agregar(
-      Integer idUsuario,
+      String correo,
       AgregarItemSolicitud req) {
+
+    // Solo el comprador usa el carrito.
+    Usuario comprador = compradorAutenticado(correo);
 
     // V-18.3: verificar que el producto exista.
     Producto producto = productoRepo.findById(req.idProducto())
@@ -97,8 +104,8 @@ public class CarritoService {
       throw new ProductoSinStockException();
     }
     // Crear el carrito si todavía no existe.
-    Carrito carrito = carritoRepo.findByCompradorId(idUsuario)
-        .orElseGet(() -> nuevoCarrito(idUsuario));
+    Carrito carrito = carritoRepo.findByCompradorId(comprador.getId())
+        .orElseGet(() -> nuevoCarrito(comprador));
 
     // Buscar si el producto ya está en el carrito.
     Optional<DetalleCarrito> existente =
@@ -126,24 +133,29 @@ public class CarritoService {
     }
     // Actualizar la fecha de modificación.
     carrito.setFechaActualizacion(OffsetDateTime.now());
-    // V-18.13: guardar y ejecutar el flush para detectar conflictos.
-    return construirRespuesta(carritoRepo.saveAndFlush(carrito));
+    // V-18.13: guardar() hace flush y convierte los choques de concurrencia
+    // (UNIQUE de PostgreSQL o @Version) en CarritoConcurrenteException -> 409.
+    // Si dos peticiones del mismo comprador crean el carrito o el mismo producto
+    // a la vez, la segunda es rechazada.
+    return construirRespuesta(guardar(carrito));
   }
 
   // MODIFICAR CANTIDAD DE UN PRODUCTO (T-18.6)
-
   /**
    * Cambia la cantidad de un producto que ya está
    * en el carrito del usuario.
    */
   @Transactional
   public CarritoRespuesta modificarCantidad(
-      Integer idUsuario,
+      String correo,
       Integer idProducto,
       BigDecimal cantidad) {
 
+    // Solo el comprador usa el carrito.
+    Usuario comprador = compradorAutenticado(correo);
+
     // V-18.8: verificar que el carrito y el producto existan.
-    Carrito carrito = carritoRepo.findByCompradorId(idUsuario)
+    Carrito carrito = carritoRepo.findByCompradorId(comprador.getId())
         .orElseThrow(ItemCarritoNoEncontradoException::new);
     DetalleCarrito item = buscarItem(carrito, idProducto)
         .orElseThrow(ItemCarritoNoEncontradoException::new);
@@ -166,21 +178,23 @@ public class CarritoService {
     // Actualizar la cantidad.
     item.setCantidad(cantidad);
     carrito.setFechaActualizacion(OffsetDateTime.now());
-    return construirRespuesta(carritoRepo.saveAndFlush(carrito));
+    return construirRespuesta(guardar(carrito));
   }
 
   // ELIMINAR PRODUCTO DEL CARRITO (T-18.6)
-
   /**
    * Elimina un producto del carrito del usuario.
    */
   @Transactional
   public CarritoRespuesta eliminarItem(
-      Integer idUsuario,
+      String correo,
       Integer idProducto) {
 
+    // Solo el comprador usa el carrito.
+    Usuario comprador = compradorAutenticado(correo);
+
     // V-18.8: verificar que el carrito exista.
-    Carrito carrito = carritoRepo.findByCompradorId(idUsuario)
+    Carrito carrito = carritoRepo.findByCompradorId(comprador.getId())
         .orElseThrow(ItemCarritoNoEncontradoException::new);
 
     // Buscar el producto dentro del carrito.
@@ -191,15 +205,48 @@ public class CarritoService {
     // orphanRemoval se encarga de eliminarlo de la BD.
     carrito.getItems().remove(item);
     carrito.setFechaActualizacion(OffsetDateTime.now());
-    return construirRespuesta(carritoRepo.saveAndFlush(carrito));
+    return construirRespuesta(guardar(carrito));
+  }
+
+  // VACIAR EL CARRITO ("Limpiar carrito")
+  /**
+   * Elimina todos los productos del carrito del usuario autenticado.
+   * Es idempotente: si el carrito no existe o ya está vacío, devuelve el
+   * carrito vacío sin error.
+   */
+  @Transactional
+  public CarritoRespuesta vaciar(String correo) {
+
+    // Solo el comprador usa el carrito.
+    Usuario comprador = compradorAutenticado(correo);
+
+    Optional<Carrito> existente = carritoRepo.findByCompradorId(comprador.getId());
+    if (existente.isEmpty() || existente.get().getItems().isEmpty()) {
+      return respuestaVacia();
+    }
+
+    Carrito carrito = existente.get();
+    // orphanRemoval se encarga de eliminar los ítems de la BD.
+    carrito.getItems().clear();
+    carrito.setFechaActualizacion(OffsetDateTime.now());
+    return construirRespuesta(guardar(carrito));
+  }
+
+  /** Carrito sin productos: lista vacía y subtotal, IVA y total en 0.00. */
+  private CarritoRespuesta respuestaVacia() {
+    return new CarritoRespuesta(
+        List.of(),
+        BigDecimal.ZERO.setScale(2),
+        BigDecimal.ZERO.setScale(2),
+        BigDecimal.ZERO.setScale(2));
   }
 
   // CONSTRUIR RESPUESTA DEL CARRITO (T-18.7)
-
   /**
-   * Construye la respuesta del carrito con sus subtotales.
+   * Construye la respuesta del carrito con sus subtotales, IVA y total.
    * Utiliza el precio vigente del producto.
    * El precio nunca es recibido desde el cliente.
+   * El IVA se calcula con la misma regla que usa el pedido (CalculoIva).
    */
   private CarritoRespuesta construirRespuesta(Carrito carrito) {
 
@@ -211,7 +258,8 @@ public class CarritoService {
     // Consultar el stock de todos los productos.
     Map<Integer, BigDecimal> stock = loteRepo.mapaStock(ids);
     List<CarritoRespuesta.ItemCarrito> items = new ArrayList<>();
-    BigDecimal total = BigDecimal.ZERO;
+    BigDecimal subtotalCarrito = BigDecimal.ZERO;
+    BigDecimal ivaCarrito = BigDecimal.ZERO;
 
     // Recorrer los productos del carrito.
     for (DetalleCarrito detalle : carrito.getItems()) {
@@ -221,6 +269,9 @@ public class CarritoService {
       BigDecimal subtotal = producto.getPrecio()
           .multiply(detalle.getCantidad())
           .setScale(2, RoundingMode.HALF_UP);
+
+      // IVA de la línea: 5 % solo para la categoría 7, 0 en las demás.
+      BigDecimal iva = CalculoIva.ivaDe(producto, subtotal);
 
       // Obtener stock disponible.
       // Si no existe información de stock, se devuelve cero.
@@ -238,28 +289,51 @@ public class CarritoService {
       items.add(new CarritoRespuesta.ItemCarrito(
           producto.getIdProducto(),
           producto.getNombre(),
+          producto.getImagen(),
           producto.getUnidadMedida().name(),
           producto.getPrecio(),
           detalle.getCantidad(),
           subtotal,
+          iva,
           disponible,
           suficiente
       ));
 
-      // Acumular el total del carrito.
-      total = total.add(subtotal);
+      // Acumular subtotal e IVA del carrito.
+      subtotalCarrito = subtotalCarrito.add(subtotal);
+      ivaCarrito = ivaCarrito.add(iva);
     }
 
-    // Devolver la respuesta con el total calculado.
+    // total = subtotal + IVA (valor final que debe pagar el comprador).
+    subtotalCarrito = subtotalCarrito.setScale(2, RoundingMode.HALF_UP);
+    ivaCarrito = ivaCarrito.setScale(2, RoundingMode.HALF_UP);
+
     return new CarritoRespuesta(
         items,
-        total.setScale(2, RoundingMode.HALF_UP)
+        subtotalCarrito,
+        ivaCarrito,
+        subtotalCarrito.add(ivaCarrito)
     );
   }
 
 
   // MÉTODOS AUXILIARES
+  /**
+   * Busca al usuario autenticado (por el correo del token) y verifica que sea
+   * COMPRADOR. Los agricultores solo pueden ver el catálogo, no comprar.
+   * Una sola consulta; devuelve el usuario para reutilizarlo.
+   */
+  private Usuario compradorAutenticado(String correo) {
 
+    Usuario usuario = usuarioRepo.findByCorreo(correo)
+        .orElseThrow(() -> new CompradorNoEncontradoException(
+            "El usuario autenticado no existe."));
+
+    if (usuario.getRol() != TipoUsuario.COMPRADOR) {
+      throw new RolCompradorInvalidoException();
+    }
+    return usuario;
+  }
   /**
    * Consulta el stock disponible de un producto.
    */
@@ -268,7 +342,6 @@ public class CarritoService {
     return loteRepo.mapaStock(List.of(idProducto))
         .getOrDefault(idProducto, BigDecimal.ZERO);
   }
-
   /**
    * Busca un producto dentro del carrito.
    */
@@ -282,16 +355,10 @@ public class CarritoService {
             .equals(idProducto))
         .findFirst();
   }
-
   /**
-   * Crea un carrito nuevo para el usuario.
+   * Crea un carrito nuevo para el comprador.
    */
-  private Carrito nuevoCarrito(Integer idUsuario) {
-
-    Usuario comprador = usuarioRepo.findById(idUsuario)
-        .orElseThrow(() -> new IllegalStateException(
-            "Usuario no encontrado"
-        ));
+  private Carrito nuevoCarrito(Usuario comprador) {
 
     Carrito carrito = new Carrito();
 
@@ -301,7 +368,6 @@ public class CarritoService {
 
     return carrito;
   }
-
   /**
    * Valida que los productos con unidad UNIDAD o BULTO
    * solamente acepten cantidades enteras.
@@ -319,6 +385,18 @@ public class CarritoService {
       throw new CantidadCarritoInvalidaException(
           "Este producto solo admite cantidades enteras"
       );
+    }
+  }
+  /**
+   * Guarda el carrito y hace flush para detectar aquí los choques de
+   * concurrencia: UNIQUE de PostgreSQL o @Version. Responde 409.
+   */
+  private Carrito guardar(Carrito carrito) {
+    try {
+      return carritoRepo.saveAndFlush(carrito);
+    } catch (DataIntegrityViolationException
+             | OptimisticLockingFailureException ex) {
+      throw new CarritoConcurrenteException();
     }
   }
 }
