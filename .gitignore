@@ -35,3 +35,6 @@ replay_pid*
 
 # VS Code
 .vscode/
+
+#env.staging.sh
+env.staging.sh

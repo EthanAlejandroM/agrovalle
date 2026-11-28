@@ -1,0 +1,641 @@
+
+/* =========================================
+    LOGIN - AGROVALLE CONNECT
+========================================= */
+
+.auth-page {
+    min-height: 100vh;
+    width: 100%;
+    display: grid;
+    grid-template-columns: minmax(0, 0.88fr) minmax(0, 1.12fr);
+    align-items: center;
+    padding: 20px;
+    gap: 35px;
+
+    background-color: #fffdf6;
+
+    background-image:
+        /* Esquina superior derecha */
+        radial-gradient(
+            ellipse 38% 36% at 100% 0%,
+            rgba(163, 203, 46, 0.48) 0%,
+            rgba(163, 203, 46, 0.22) 40%,
+            transparent 100%
+        ),
+
+        /* Esquina inferior izquierda */
+        radial-gradient(
+            ellipse 32% 30% at 0% 100%,
+            rgba(163, 203, 46, 0.38) 0%,
+            rgba(163, 203, 46, 0.16) 45%,
+            transparent 100%
+        );
+}
+
+/* =========================================
+    IMAGEN LATERAL
+========================================= */
+
+.auth-image {
+    width: 100%;
+    height: min(calc(100vh - 40px), 540px);
+    min-height: 400px;
+    overflow: hidden;
+    border-radius: 17px;
+    align-self: center;
+}
+
+.auth-image > img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+}
+
+/* =========================================
+    CONTENIDO
+========================================= */
+
+.auth-content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    padding: 35px 6%;
+}
+
+.login-container {
+    width: 100%;
+    max-width: 430px;
+}
+
+/* =========================================
+    ENCABEZADO
+========================================= */
+
+.login-header {
+    margin-bottom: 38px;
+}
+
+.login-header h1 {
+    color: var(--color-green);
+    font-size: clamp(27px, 2.3vw, 31px);
+    font-weight: 700;
+    margin: 0 0 8px;
+}
+
+.login-header p {
+    color: var(--color-secondary);
+    font-size: 16px;
+    font-weight: 300;
+    margin: 0;
+    line-height: 1.6;
+}
+
+/* =========================================
+    FORMULARIO
+========================================= */
+
+.login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.form-group label {
+    color: var(--color-green);
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.form-group input {
+    width: 100%;
+    height: 49px;
+    padding: 0 14px;
+
+    border: 1px solid #b8b8b8;
+    border-radius: 12px;
+
+    outline: none;
+    color: var(--color-text);
+    font-size: 14px;
+
+    background: rgba(255, 255, 255, 0.85);
+
+    transition: border-color 0.2s ease;
+}
+
+.form-group input::placeholder {
+    color: #999999;
+    font-weight: 400;
+}
+
+.form-group input:focus {
+    border-color: var(--color-green);
+}
+
+/* =========================================
+    CONTRASEÑA
+========================================= */
+
+.password-wrapper {
+    position: relative;
+    width: 100%;
+    
+}
+
+/* Oculta el botón nativo de Edge para que solo se vea el ojo propio */
+.password-wrapper input::-ms-reveal,
+.password-wrapper input::-ms-clear {
+    display: none;
+}
+
+.password-wrapper input {
+    padding-right: 48px;
+}
+
+.password-toggle {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    border: none;
+    background: transparent;
+    color: var(--color-green);
+
+    padding: 4px;
+}
+
+/* =========================================
+    OPCIONES DE LOGIN
+========================================= */
+
+.login-options {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 14px;
+    margin-top: -5px;
+}
+
+.remember-option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    color: var(--color-secondary);
+    font-size: 14px;
+
+    cursor: pointer;
+}
+
+.remember-option input {
+    width: 14px;
+    height: 14px;
+    accent-color: var(--color-green);
+    cursor: pointer;
+}
+
+.forgot-password {
+    color: var(--color-secondary);
+    font-size: 14px;
+    white-space: nowrap;
+}
+
+/* =========================================
+    BOTÓN DE INICIO
+========================================= */
+
+.login-button {
+    width: 100%;
+    height: 49px;
+
+    border: none;
+    border-radius: 11px;
+
+    background: #b84449;
+    color: #ffffff;
+
+    font-size: 14px;
+    font-weight: 500;
+
+    transition: background 0.2s ease;
+}
+
+.login-button:hover {
+    background: #a6383d;
+}
+
+/* =========================================
+    REGISTRO CON LÍNEAS LATERALES
+========================================= */
+
+.register-link {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 9px;
+
+    width: 100%;
+    margin-top: 4px;
+
+    color: var(--color-secondary);
+    font-size: 14px;
+    white-space: nowrap;
+}
+
+.register-link::before,
+.register-link::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: #b9b9b0;
+}
+
+.register-link a {
+    color: var(--color-green);
+    text-decoration: underline;
+}
+
+/* =========================================
+    TABLETS
+========================================= */
+
+@media (max-width: 900px) and (min-width: 769px) {
+    .auth-page {
+        gap: 22px;
+        grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+    }
+
+    .auth-content {
+        padding: 25px 2%;
+    }
+
+    .login-header h1 {
+        font-size: 25px;
+    }
+}
+
+/* =========================================
+    MÓVILES
+========================================= */
+
+@media (max-width: 768px) {
+    .auth-page {
+        grid-template-columns: 1fr;
+        padding: 14px;
+        gap: 0;
+    }
+
+    .auth-image {
+        display: block;
+        width: 100%;
+        height: 190px;
+        min-height: 0;
+        border-radius: 14px;
+    }
+
+    .auth-image > img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center 55%;
+    }
+
+    .auth-content {
+        min-height: auto;
+        padding: 35px 12px 45px;
+    }
+
+    .login-container {
+        max-width: 450px;
+    }
+
+    .login-header {
+        margin-bottom: 30px;
+    }
+}
+
+/* =========================================
+    MÓVILES PEQUEÑOS
+========================================= */
+
+@media (max-width: 380px) {
+    .auth-image {
+        height: 155px;
+    }
+
+    .login-header h1 {
+        font-size: 24px;
+    }
+
+    .login-header p {
+        font-size: 13px;
+    }
+
+    .login-options {
+        flex-wrap: wrap;
+    }
+
+    .forgot-password {
+        font-size: 11px;
+    }
+
+    .register-link {
+        font-size: 11px;
+        gap: 6px;
+    }
+}
+
+
+/* =========================================
+    ESTADOS COMUNES (login y registro)
+========================================= */
+
+.form-group select {
+    width: 100%;
+    height: 49px;
+    padding: 0 12px;
+
+    border: 1px solid #b8b8b8;
+    border-radius: 12px;
+
+    outline: none;
+    color: var(--color-text);
+    font-size: 14px;
+
+    background-color: rgba(255, 255, 255, 0.85);
+    transition: border-color 0.2s ease;
+}
+
+.form-group select:invalid {
+    color: #999999;
+}
+
+.form-group select:focus {
+    border-color: var(--color-green);
+}
+
+.form-group input:focus-visible,
+.form-group select:focus-visible,
+.password-toggle:focus-visible,
+.login-button:focus-visible,
+.check-option input:focus-visible,
+.remember-option input:focus-visible {
+    outline: 3px solid rgba(49, 91, 56, 0.35);
+    outline-offset: 2px;
+}
+
+.form-group--error input,
+.form-group--error select {
+    border-color: #b84449;
+}
+
+.field-error {
+    margin: 0;
+    color: #a6383d;
+    font-size: 13px;
+    font-weight: 400;
+}
+
+.notice {
+    margin: 0 0 22px;
+    padding: 12px 14px;
+    border-radius: 12px;
+    font-size: 14px;
+}
+
+.notice--error {
+    background: #fbeaea;
+    color: #9a3335;
+    border: 1px solid #e6bcbc;
+}
+
+.notice--success {
+    background: #e8f2e4;
+    color: var(--color-green);
+    border: 1px solid #bfd8b8;
+}
+
+.login-button:disabled {
+    opacity: 0.65;
+    cursor: progress;
+}
+
+/* =========================================
+    REGISTRO - AGROVALLE CONNECT
+========================================= */
+
+.auth-page--signup {
+    grid-template-columns: clamp(210px, 24.5vw, 340px) minmax(0, 1fr);
+    align-items: stretch;
+    padding: 0;
+    gap: 0;
+
+    background-image: radial-gradient(
+        ellipse 45% 55% at 30% 80%,
+        rgba(163, 203, 46, 0.25) 0%,
+        transparent 100%
+    );
+}
+
+/* Barra lateral verde con el logotipo */
+.auth-page--signup .auth-image {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    min-height: 0;
+    align-self: start;
+
+    display: grid;
+    place-items: center;
+    padding: 32px;
+
+    background: #6a994b;
+    border-radius: 0;
+}
+
+.auth-page--signup .auth-image > img {
+    width: min(100%, 240px);
+    height: auto;
+    object-fit: contain;
+}
+
+.auth-page--signup .auth-content {
+    justify-content: flex-start;
+    align-items: flex-start;
+    padding: clamp(32px, 6vh, 64px) clamp(24px, 5vw, 80px) 48px;
+}
+
+.signup-container {
+    width: 100%;
+    max-width: 920px;
+}
+
+.signup-header {
+    margin-bottom: 32px;
+}
+
+.signup-header h1 {
+    margin: 0 0 8px;
+    color: var(--color-green);
+    font-size: clamp(20px, 2.1vw, 30px);
+    font-weight: 700;
+    line-height: 1.2;
+    text-transform: uppercase;
+}
+
+.signup-header p {
+    margin: 0;
+    color: var(--color-secondary);
+    font-size: 16px;
+    font-weight: 300;
+    line-height: 1.6;
+}
+
+.signup-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: clamp(32px, 6vw, 88px);
+    align-items: start;
+}
+
+.signup-column {
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+    min-width: 0;
+}
+
+.signup-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: clamp(32px, 6vw, 88px);
+    align-items: center;
+    margin-top: 30px;
+}
+
+.signup-checks {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.check-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    color: var(--color-green);
+    font-size: 15px;
+    font-weight: 300;
+    cursor: pointer;
+}
+
+.check-option input {
+    width: 18px;
+    height: 18px;
+    flex: none;
+    accent-color: var(--color-green);
+    cursor: pointer;
+}
+
+.signup-footer {
+    margin: 28px 0 0;
+    text-align: center;
+    color: var(--color-secondary);
+    font-size: 14px;
+}
+
+.signup-footer a {
+    color: var(--color-green);
+    text-decoration: underline;
+}
+
+/* Pantalla provisional posterior al login */
+.home-placeholder {
+    min-height: 100vh;
+    display: grid;
+    place-content: center;
+    justify-items: center;
+    gap: 12px;
+    padding: 24px;
+    text-align: center;
+    color: var(--color-green);
+}
+
+.home-placeholder h1 {
+    margin: 0;
+    font-size: 26px;
+}
+
+.home-placeholder p {
+    margin: 0 0 8px;
+}
+
+.home-placeholder__button {
+    width: auto;
+    padding: 0 28px;
+}
+
+/* =========================================
+    REGISTRO - RESPONSIVE
+========================================= */
+
+@media (max-width: 899px) {
+    .signup-grid,
+    .signup-actions {
+        grid-template-columns: 1fr;
+    }
+
+    .signup-column + .signup-column {
+        margin-top: 22px;
+    }
+
+    .signup-actions {
+        row-gap: 24px;
+    }
+}
+
+@media (max-width: 768px) {
+    .auth-page--signup {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto 1fr;
+        align-items: start;
+        background-image: none;
+    }
+
+    .auth-page--signup .auth-image {
+        position: static;
+        height: auto;
+        padding: 20px;
+        border-radius: 0 0 28px 28px;
+    }
+
+    .auth-page--signup .auth-image > img {
+        width: 120px;
+    }
+
+    .auth-page--signup .auth-content {
+        padding: 28px 18px 40px;
+    }
+
+    .signup-header h1 {
+        font-size: 20px;
+    }
+
+    .signup-header p {
+        font-size: 14px;
+    }
+}
