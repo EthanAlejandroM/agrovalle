@@ -29,3 +29,11 @@ export interface RegistroResponse {
     id: number;
     rol: RolUsuario;
 }
+
+// Formato de error que devuelve el backend (GlobalExceptionHandler / ApiError)
+export interface ApiErrorResponse {
+    status: number;
+    codigo: string;
+    detalle: string;
+    errores: { campo: string; mensaje: string }[];
+}
